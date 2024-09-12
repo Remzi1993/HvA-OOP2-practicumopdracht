@@ -241,15 +241,18 @@ public class PersonController extends Controller {
     private void handleMenuCloseButton(ActionEvent event) {
         alert = new AlertDialog("CONFIRMATION", "Afsluiten",
                 "Wilt u de app afsluiten?", alertDialogIcon, APP_CSS);
-        try (InputStream inputStream = MainApplication.class.getResourceAsStream("images/emoji/screaming.gif")) {
+
+        String path1 = "images/emoji/screaming.gif";
+        try (InputStream inputStream = MainApplication.class.getResourceAsStream(path1)) {
             if (inputStream == null) {
-                throw new IllegalArgumentException("File not found as resource: images/emoji/screaming.gif");
+                throw new IllegalArgumentException("File not found as resource: " + path1);
             }
             alert.setGraphic(new ImageView(new Image(inputStream, 100,
                     100, true, true)));
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the application icon.", e);
         }
+
         alert.show();
 
         if (alert.getResult() == ButtonType.OK) {

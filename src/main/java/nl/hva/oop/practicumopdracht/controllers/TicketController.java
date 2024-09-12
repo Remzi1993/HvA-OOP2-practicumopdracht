@@ -260,15 +260,18 @@ public class TicketController extends Controller {
     private void handleMenuCloseButton(ActionEvent event) {
         alert = new AlertDialog("CONFIRMATION", "Afsluiten",
                 "Weet u zeker dat u de app wilt afsluiten?", alertDialogIcon, APP_CSS);
-        try (InputStream inputStream = MainApplication.class.getResourceAsStream("images/emoji/cry.gif")) {
+
+        String path1 = "images/emoji/cry.gif";
+        try (InputStream inputStream = MainApplication.class.getResourceAsStream(path1)) {
             if (inputStream == null) {
-                throw new IllegalArgumentException("File not found as resource: images/emoji/screaming.gif");
+                throw new IllegalArgumentException("File not found as resource: " + path1);
             }
             alert.setGraphic(new ImageView(new Image(inputStream, 100,
                     100, true, true)));
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the application icon.", e);
         }
+
         alert.show();
 
         if (alert.getResult() == ButtonType.OK) {
