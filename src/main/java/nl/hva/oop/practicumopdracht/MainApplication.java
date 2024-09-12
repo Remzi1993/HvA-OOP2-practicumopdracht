@@ -43,7 +43,7 @@ public class MainApplication extends Application {
     // TicketDAO - DetailDAO
     private static TicketDAO ticketDAO;
     // For DAOs - the directory the application data is stored in
-    private static final String APP_DATA_DIRECTORY = "App_data";
+    private static final String APP_DATA_DIRECTORY = "data";
     public static final String APP_VERSION = "2.0.0";
     private final Image APP_ICON;
     private static final String APP_CSS = Objects.requireNonNull(
