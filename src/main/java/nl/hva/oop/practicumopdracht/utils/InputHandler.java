@@ -3,16 +3,15 @@ package nl.hva.oop.practicumopdracht.utils;
 import javafx.scene.control.*;
 import javafx.scene.layout.Border;
 import javafx.scene.paint.Color;
-
 import java.time.LocalDate;
 import java.util.Objects;
-
 import static nl.hva.oop.practicumopdracht.MainApplication.getDateFormat;
 
 /**
  * Class InputHandler
  * Handles/checks all kinds of inputs (JavaFX UI Controls) and clears all inputs. There are also methods to check inputs
  * for double and int
+ *
  * @author Remzi Cavdar - remzi.cavdar@hva.nl
  */
 public class InputHandler {
@@ -22,6 +21,7 @@ public class InputHandler {
 
     /**
      * Method to check for any JavaFX input control if it is empty or not
+     *
      * @param inputs Checks if the inputs are empty and set a red border around the empty inputs
      */
     public void checkValues(Object[] inputs) {
@@ -54,8 +54,7 @@ public class InputHandler {
     }
 
     /**
-     *
-     * @param inputs Checks if the inputs are empty and set a red border around the empty inputs
+     * @param inputs           Checks if the inputs are empty and set a red border around the empty inputs
      * @param DatePickerMinAge Checks if a datepicker input is older than the minimum age
      */
     public void checkValues(Object[] inputs, int DatePickerMinAge) {
@@ -142,7 +141,7 @@ public class InputHandler {
     }
 
     /**
-     * @param inputs Clears all inputs
+     * @param inputs        Clears all inputs
      * @param clearComboBox Clears the ComboBox if set to true
      */
     public void clearValues(Object[] inputs, boolean clearComboBox, boolean DatePickerDefaultValue) {

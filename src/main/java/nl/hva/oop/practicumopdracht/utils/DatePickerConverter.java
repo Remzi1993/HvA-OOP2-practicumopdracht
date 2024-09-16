@@ -1,11 +1,9 @@
 package nl.hva.oop.practicumopdracht.utils;
 
 import javafx.util.StringConverter;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-
 import static nl.hva.oop.practicumopdracht.MainApplication.DEBUG;
 
 /**

@@ -19,8 +19,6 @@ import static nl.hva.oop.practicumopdracht.MainApplication.APP_VERSION;
  * @author Remzi Cavdar - remzi.cavdar@hva.nl
  */
 public class AboutView {
-    private final String APP_CSS = new MainApplication().getAppCSS();
-
     public AboutView() {
         Stage stage = new Stage();
         stage.getIcons().add(new MainApplication().getAppIcon());
@@ -122,8 +120,8 @@ public class AboutView {
         gridpane.add(label7, 0, 3);
         gridpane.add(link, 1, 3);
         Label label8 = new Label("Repository:");
-        Hyperlink link2 = new Hyperlink("gitlab.fdmci.hva.nl/OOP2/2223/blok-1/student-1",
-                "https://gitlab.fdmci.hva.nl/OOP2/2223/blok-1/student-1");
+        Hyperlink link2 = new Hyperlink("github.com/Remzi1993/HvA-OOP2-practicumopdracht",
+                "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht");
         gridpane.add(label8, 0, 4);
         gridpane.add(link2, 1, 4);
         Label label9 = new Label("School:");
@@ -150,7 +148,7 @@ public class AboutView {
         // Scene
         Scene scene = new Scene(vboxContainer, 600, 400);
         // Apply stylesheet
-        scene.getStylesheets().add(APP_CSS);
+        scene.getStylesheets().add(MainApplication.getAppCSS());
         return scene;
     }
 }

@@ -38,7 +38,7 @@ public class PersonController extends Controller {
     private TicketDAO ticketDAO;
     private AlertDialog alert;
     private Image alertDialogIcon = new MainApplication().getAppIcon();
-    private final String APP_CSS = new MainApplication().getAppCSS();
+    private final String APP_CSS = MainApplication.getAppCSS();
     // All the inputs from the view
     private TextField fullName, birthplace, nationality, SSN, documentNumber;
     private ComboBox<String> sex;

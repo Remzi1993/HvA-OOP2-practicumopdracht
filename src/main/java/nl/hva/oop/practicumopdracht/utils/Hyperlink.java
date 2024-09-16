@@ -1,7 +1,6 @@
 package nl.hva.oop.practicumopdracht.utils;
 
 import javafx.scene.Node;
-
 import java.awt.*;
 import java.net.URI;
 
@@ -26,7 +25,7 @@ public class Hyperlink extends javafx.scene.control.Hyperlink {
 
     public void setUrl(String url) {
         // Make the link clickable and open the URL in the default browser.
-        this.setOnAction(e -> {
+        this.setOnAction(_ -> {
             if (Desktop.isDesktopSupported()) {
                 try {
                     Desktop.getDesktop().browse(new URI(url));

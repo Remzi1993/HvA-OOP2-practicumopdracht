@@ -349,3 +349,4 @@ gradle-app.setting
 App.lock
 # Examples of app data. Comment this out when in production
 # App_data
+JRE/

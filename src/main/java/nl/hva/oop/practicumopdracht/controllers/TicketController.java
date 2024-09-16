@@ -39,7 +39,7 @@ public class TicketController extends Controller {
     private PersonDAO personDAO;
     private AlertDialog alert;
     private Image alertDialogIcon = new MainApplication().getAppIcon();
-    private final String APP_CSS = new MainApplication().getAppCSS();
+    private final String APP_CSS = MainApplication.getAppCSS();
     // All the inputs from the view
     private ComboBox<Person> belongsTo;
     private TextField destination, cost;

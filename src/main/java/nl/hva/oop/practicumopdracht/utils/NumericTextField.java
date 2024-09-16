@@ -1,7 +1,6 @@
 package nl.hva.oop.practicumopdracht.utils;
 
 import javafx.scene.control.TextField;
-
 import java.text.DecimalFormatSymbols;
 import java.util.regex.Pattern;
 
