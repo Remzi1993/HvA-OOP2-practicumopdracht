@@ -1,5 +1,7 @@
-# PowerShell script for automating the HvA JavaFX project packaging process
-# Save this as 'package.ps1' in the root directory of your project
+# PowerShell script for automating the HvA JavaFX project packaging process.
+
+# Define the app version as a variable
+$appVersion = "2.0.1"
 
 # Step 1: Run the Maven wrapper script to ensure the correct version of Maven is used
 Write-Host "Running Maven wrapper script..."
@@ -28,7 +30,7 @@ Write-Host "Packaging project into jar-with-dependencies.jar..."
 
 # Step 6: Delete everything in the target directory except the jar-with-dependencies.jar
 Write-Host "Cleaning up target directory, keeping only jar-with-dependencies.jar..."
-Get-ChildItem -Path "target" -Exclude "practicumopdracht-2.0.0-jar-with-dependencies.jar" | Remove-Item -Recurse -Force
+Get-ChildItem -Path "target" -Exclude "practicumopdracht-$appVersion-jar-with-dependencies.jar" | Remove-Item -Recurse -Force
 
 # Step 7: Use jpackage to create an installer
 Write-Host "Creating installer using jpackage..."
@@ -36,7 +38,7 @@ jpackage `
     --input target `
     --name "Practicumopdracht OOP2" `
     --main-class nl.hva.oop.practicumopdracht.Main `
-    --main-jar practicumopdracht-2.0.0-jar-with-dependencies.jar `
+    --main-jar practicumopdracht-$appVersion-jar-with-dependencies.jar `
     --type msi `
     --icon .\src\main\resources\nl\hva\oop\practicumopdracht\images\icon.ico `
     --win-menu `
@@ -47,7 +49,7 @@ jpackage `
     --win-menu-group "Remzi Cavdar" `
     --copyright "Remzi Cavdar" `
     --description "HvA Java practicumopdracht voor OOP2" `
-    --app-version "2.0.0" `
+    --app-version $appVersion `
     --win-help-url "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht" `
     --runtime-image .\JRE\ `
     --dest .\out

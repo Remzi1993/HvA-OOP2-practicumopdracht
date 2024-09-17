@@ -5,6 +5,7 @@ De applicatie toont een lijst van personen met vliegtickets.
 ## Packaging voor Windows
 Gebruik het PowerShell-script `.\package.ps1` om automatisch een installer voor Windows te genereren. 
 Het script voert verschillende stappen uit, waaronder het bouwen van een runtime image met jlink en het maken van een installer met jpackage.
+- Om de app versie te veranderen, pas de versie aan in `pom.xml`, `package.ps1` en `src\main\java\nl\hva\oop\practicumopdracht\MainApplication.java`.
 
 ### Het script voert de volgende stappen uit:
 1. Run de Maven wrapper script om ervoor te zorgen dat de juiste versie van Maven wordt gebruikt.

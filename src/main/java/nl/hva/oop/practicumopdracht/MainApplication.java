@@ -16,7 +16,6 @@ import java.nio.charset.Charset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
-
 import static nl.hva.oop.practicumopdracht.Main.*;
 
 /**
@@ -44,7 +43,7 @@ public class MainApplication extends Application {
     private static TicketDAO ticketDAO;
     // For DAOs - the directory the application data is stored in
     private static final String APP_DATA_DIRECTORY = "data";
-    public static final String APP_VERSION = "2.0.0";
+    public static final String APP_VERSION = "2.0.1";
     private final Image APP_ICON;
     private static final String APP_CSS = Objects.requireNonNull(
             MainApplication.class.getResource("style.css")).toExternalForm();

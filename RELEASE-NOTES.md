@@ -24,3 +24,5 @@
 - Upgraded to Java 22
 - Upgraded all dependencies
 - Switched to Apache Commons IO for better file handling
+## 2.0.1
+- Improved docs and automated the release process
