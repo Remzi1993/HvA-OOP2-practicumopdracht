@@ -55,3 +55,21 @@ jpackage `
     --dest .\out
 
 Write-Host "Installer created and saved in the 'out' directory."
+
+# Step 8: Remove the target and JRE directories
+Write-Host "Removing target and JRE directories..."
+if (Test-Path "target") {
+    Remove-Item -Recurse -Force "target"
+    Write-Host "target directory removed."
+} else {
+    Write-Host "target directory not found."
+}
+
+if (Test-Path "JRE") {
+    Remove-Item -Recurse -Force "JRE"
+    Write-Host "JRE directory removed."
+} else {
+    Write-Host "JRE directory not found."
+}
+
+Write-Host "Cleanup complete."

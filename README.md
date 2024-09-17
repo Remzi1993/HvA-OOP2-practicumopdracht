@@ -15,7 +15,7 @@ Het script voert verschillende stappen uit, waaronder het bouwen van een runtime
 5. Met Maven wordt een .jar bestand inclusief dependencies aangemaakt: `./mvnw clean package`
 6. Alles in de `target` directory wordt verwijderd behalve de `jar-with-dependencies.jar` via Maven: `./mvnw clean`
 7. Als laatste wordt jpackage gebruikt om een Windows MSI installer te maken. Het commando dat hiervoor wordt uitgevoerd: `jpackage --input target --name "Practicumopdracht OOP2" --main-class nl.hva.oop.practicumopdracht.Main --main-jar practicumopdracht-2.0.0-jar-with-dependencies.jar --type msi --icon .\src\main\resources\nl\hva\oop\practicumopdracht\images\icon.ico --win-menu --win-shortcut --win-per-user-install --win-shortcut-prompt --vendor "Remzi Cavdar" --win-menu-group "Remzi Cavdar" --copyright "Remzi Cavdar" --description "HvA Java practicumopdracht voor OOP2" --app-version "2.0.0" --win-help-url "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht" --runtime-image .\JRE\ --dest .\out`
-8. De installer staat in de `out` directory.
+8. De installer staat in de `out` directory. De mappen `JRE` en `target` wordt verwijderd na het maken van de installer.
 
 ## Testen van de installer
 Ik raad Windows Sandbox aan om de installer te testen.
