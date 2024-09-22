@@ -2,6 +2,11 @@
 Dit project is een JavaFX applicatie die een master-detail functionaliteit implementeert. 
 De applicatie toont een lijst van personen met vliegtickets.
 
+## Demo
+![Screenshot 2024-09-22 034414](https://github.com/user-attachments/assets/3d5c3f98-0d5f-406c-a1d6-a482af43a5a0)
+![Screenshot 2024-09-22 034445](https://github.com/user-attachments/assets/5faa5704-6967-48cc-bbae-6d9a88e323e3)
+![Screenshot 2024-09-22 034523](https://github.com/user-attachments/assets/e86e9070-069f-47c6-922e-99d56499d994)
+
 ## Packaging voor Windows
 Gebruik het PowerShell-script `.\package.ps1` om automatisch een installer voor Windows te genereren. 
 Het script voert verschillende stappen uit, waaronder het bouwen van een runtime image met jlink en het maken van een installer met jpackage.
