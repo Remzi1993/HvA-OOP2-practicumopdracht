@@ -19,12 +19,10 @@ import nl.hva.oop.practicumopdracht.utils.IsNumeric;
 import nl.hva.oop.practicumopdracht.views.AboutView;
 import nl.hva.oop.practicumopdracht.views.PersonView;
 import nl.hva.oop.practicumopdracht.views.View;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Objects;
-
 import static nl.hva.oop.practicumopdracht.MainApplication.*;
 
 /**
@@ -288,7 +286,7 @@ public class PersonController extends Controller {
 
         if (DEBUG) {
             System.out.printf("""
-                                                
+                            
                             Input values:
                             Full name: %s
                             Sex: %s
@@ -297,7 +295,7 @@ public class PersonController extends Controller {
                             Nationality: %s
                             SSN: %s
                             Document number: %s
-                                                
+                            
                             """, fullName.getText().strip(), sex.getSelectionModel().getSelectedItem(),
                     birthdate.getValue(), birthplace.getText().strip(), nationality.getText().strip(),
                     SSN.getText().strip(), documentNumber.getText().strip());

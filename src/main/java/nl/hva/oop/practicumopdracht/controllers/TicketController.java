@@ -22,10 +22,8 @@ import nl.hva.oop.practicumopdracht.utils.IsNumeric;
 import nl.hva.oop.practicumopdracht.views.AboutView;
 import nl.hva.oop.practicumopdracht.views.TicketView;
 import nl.hva.oop.practicumopdracht.views.View;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-
 import static nl.hva.oop.practicumopdracht.MainApplication.*;
 
 /**

@@ -1,9 +1,11 @@
 package nl.hva.oop.practicumopdracht.utils;
 
+import javafx.animation.PauseTransition;
 import javafx.scene.Scene;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import nl.hva.oop.practicumopdracht.MainApplication;
 
 /**
@@ -11,13 +13,22 @@ import nl.hva.oop.practicumopdracht.MainApplication;
  * @author Remzi Cavdar - ict@remzi.info - <a href="https://github.com/Remzi1993">@Remzi1993</a>
  */
 public class Preloader extends javafx.application.Preloader {
-    private static final ProgressBar PROGRESS_BAR = new ProgressBar();
     private static Stage stage;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = MainApplication.DEBUG;
 
     private Scene getScene() {
         BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(PROGRESS_BAR);
+
+        // Create a ProgressIndicator (which has a built-in spinning animation when indeterminate)
+        ProgressIndicator progressCircle = new ProgressIndicator();
+        // Explicitly set it to indeterminate mode
+        progressCircle.setProgress(-1F);
+
+        // Set the ProgressIndicator in the centre of the BorderPane
+        borderPane.setCenter(progressCircle);
+        // Set background to white
+        borderPane.setStyle("-fx-background-color: white;");
+
         return new Scene(borderPane, 300, 150);
     }
 
@@ -32,21 +43,18 @@ public class Preloader extends javafx.application.Preloader {
     }
 
     @Override
-    public void handleProgressNotification(ProgressNotification pn) {
-        PROGRESS_BAR.setProgress(pn.getProgress());
-    }
-
-    @Override
     public void handleStateChangeNotification(StateChangeNotification evt) {
         if (evt.getType() == StateChangeNotification.Type.BEFORE_START) {
             if (DEBUG) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                // Use PauseTransition to delay the preloader for 5 seconds in DEBUG mode
+                PauseTransition pause = new PauseTransition(Duration.seconds(5));
+                pause.setOnFinished(_ -> {
+                    stage.hide();  // Hide the preloader after the delay
+                });
+                pause.play();
+            } else {
+                stage.hide();  // Immediately hide the preloader in non-DEBUG mode
             }
-            stage.hide();
         }
     }
 }

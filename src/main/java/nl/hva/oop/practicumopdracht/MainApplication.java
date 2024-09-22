@@ -10,11 +10,14 @@ import javafx.stage.Stage;
 import nl.hva.oop.practicumopdracht.controllers.Controller;
 import nl.hva.oop.practicumopdracht.controllers.PersonController;
 import nl.hva.oop.practicumopdracht.data.*;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import static nl.hva.oop.practicumopdracht.Main.*;
 
@@ -27,7 +30,7 @@ import static nl.hva.oop.practicumopdracht.Main.*;
  * @author Remzi Cavdar - remzi.cavdar@hva.nl
  */
 public class MainApplication extends Application {
-    private static final String TITLE = String.format("Practicumopdracht OOP2 - %s - %d", getStudentName(),
+    private static final String TITLE = String.format("HvA OOP2 practicumopdracht - %s - %d", getStudentName(),
             getStudentNumber());
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
@@ -42,8 +45,8 @@ public class MainApplication extends Application {
     // TicketDAO - DetailDAO
     private static TicketDAO ticketDAO;
     // For DAOs - the directory the application data is stored in
-    private static final String APP_DATA_DIRECTORY = "data";
-    public static final String APP_VERSION = "2.0.1";
+    private static String APP_DATA_DIRECTORY;
+    public static final String APP_VERSION = "2.0.2";
     private final Image APP_ICON;
     private static final String APP_CSS = Objects.requireNonNull(
             MainApplication.class.getResource("style.css")).toExternalForm();
@@ -62,6 +65,17 @@ public class MainApplication extends Application {
             APP_ICON = new Image(inputStream);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the application icon.", e);
+        }
+
+        String os = System.getProperty("os.name").toUpperCase();
+        String appFolder = "Remzi Cavdar" + File.separator + "HvA OOP2 practicumopdracht";
+
+        if (os.contains("WIN")) {
+            // Correctly get the APPDATA folder and append the app folder
+            APP_DATA_DIRECTORY = System.getenv("APPDATA") + File.separator + appFolder;
+        } else {
+            // For non-Windows OS, get the user home and append the app folder
+            APP_DATA_DIRECTORY = System.getProperty("user.home") + File.separator + appFolder;
         }
     }
 

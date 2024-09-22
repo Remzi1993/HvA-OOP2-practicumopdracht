@@ -26,3 +26,5 @@
 - Switched to Apache Commons IO for better file handling
 ## 2.0.1
 - Improved docs and automated the release process
+## 2.0.1
+- Upgraded to Java and JavaFX 23. Improved instance locking.

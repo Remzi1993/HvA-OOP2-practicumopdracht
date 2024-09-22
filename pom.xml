@@ -6,13 +6,15 @@
 
     <groupId>nl.hva.oop</groupId>
     <artifactId>practicumopdracht</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <name>practicumopdracht</name>
 
     <properties>
-        <app.version>2.0.1</app.version>
+        <app.version>2.0.2</app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.0</junit.version>
+        <java.version>23</java.version>
+        <javafx.version>23</javafx.version>
     </properties>
 
     <organization>
@@ -40,10 +42,10 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>22.0.2</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
-                <groupId>commons-io</groupId>
+            <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.16.1</version>
         </dependency>
@@ -73,8 +75,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>22</source>
-                    <target>22</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>

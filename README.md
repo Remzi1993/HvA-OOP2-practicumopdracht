@@ -21,5 +21,6 @@ Het script voert verschillende stappen uit, waaronder het bouwen van een runtime
 Ik raad Windows Sandbox aan om de installer te testen.
 - Deze feature is beschikbaar op Windows 10 of 11 (alle edities behalve Home).
 - Schakel Windows Sandbox in via Windows-onderdelen.
+- In het mapje data is er dummy data voor de app (van elke datatype). Kopieer de data naar de map `%APPDATA%\Remzi Cavdar\HvA OOP2 practicumopdracht`
 
 Als je Windows Sandbox niet hebt of niet wilt gebruiken kan je de installer ook testen op een virtuele machine of op je eigen computer.

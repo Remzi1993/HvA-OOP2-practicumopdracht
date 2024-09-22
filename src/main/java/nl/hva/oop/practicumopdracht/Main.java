@@ -3,13 +3,12 @@ package nl.hva.oop.practicumopdracht;
 import javafx.application.Application;
 import nl.hva.oop.practicumopdracht.utils.Preloader;
 import org.apache.commons.io.FileUtils;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
+import java.io.*;
+import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Properties;
+import static nl.hva.oop.practicumopdracht.MainApplication.DEBUG;
 
 /**
  * Main class for starting up the JavaFX application with a call to launch MainApplication.
@@ -22,6 +21,8 @@ public class Main {
     private static final boolean YES_I_ACCEPT = true;
     public static boolean launchedFromMain;
     private static final boolean PRELOADER = false;
+    private static final File CONFIG_FILE = new File("data/config.properties");
+    private static ServerSocket serverSocket;
 
     public static void main(String[] args) {
         if (!YES_I_ACCEPT) {
@@ -30,56 +31,15 @@ public class Main {
         }
         launchedFromMain = true;
 
-        /*
-         * Prevents the user of starting multiple instances of the application.
-         * This is done by creating a temporary file in the app directory.
-         * The temp file is excluded from git and is called App.lock.
-         */
-        final File FILE = FileUtils.getFile("App.lock");
+        int port = loadPortFromConfig();
 
-        if (FILE.exists()) {
-            System.err.println("Error: Another instance of the application is already running.");
-            return;
-        }
-
-        try (
-                FileOutputStream fileOutputStream = FileUtils.openOutputStream(FILE);
-                FileChannel channel = fileOutputStream.getChannel();
-                FileLock lock = channel.lock()
-        ) {
-        } catch (SecurityException e) {
-            System.err.printf("""
-                    SecurityException: Insufficient permissions to create or access the lock file.
-                    Please check the file system permissions or run the application with elevated privileges.
-                    Error details: %s%n
-                    """, e.getMessage());
-            e.printStackTrace();
-        } catch (OverlappingFileLockException e) {
-            System.err.printf("""
-                    OverlappingFileLockException: The lock file is already locked by another process or thread in this JVM.
-                    Ensure that only one instance of the application is running.
-                    Error details: %s%n
-                    """, e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            // Handles both FileNotFoundException and any other IO related errors
-            System.err.printf("""
-                    IOException: An I/O error occurred while trying to create or lock the file.
-                    Possible causes: disk full, file system issues, or file access permissions.
-                    Error details: %s%n
-                    """, e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        if (!attemptSingleInstanceLock(port)) {
+            return; // Another instance is already running
         }
 
         /*
-         * Register a shutdown hook to delete the lock file when the application is closed. Even when forcefully closed
-         * with the task manager. (Tested on Windows 11 with JavaFX 19)
-         */
-        FILE.deleteOnExit();
-        /*
-         * If the boolean PRELOADER is set to true a preloader will be shown. If there is not a lot of data to be loaded
-         * then the preloader would be too fast to see.
+         * If the boolean PRELOADER is set to true, a preloader will be shown.
+         * If there is not a lot of data to be loaded, then the preloader would be too fast to see.
          */
         if (PRELOADER) {
             System.setProperty("javafx.preloader", Preloader.class.getName());
@@ -94,18 +54,61 @@ public class Main {
         System.out.printf("Studentnummer: %s%n", STUDENT_NUMBER);
         System.out.println("---");
 
-        String integriteitsVerklaring =
-                "Ik verklaar naar eer en geweten dat ik deze practicumopdracht zelf zal maken en geen plagiaat zal plegen " +
-                        "door code van anderen over te nemen.\n\n" +
+        String Integriteitsverklaring = """
+                Ik verklaar naar eer en geweten dat ik deze practicumopdracht zelf zal maken en geen plagiaat zal
+                plegen door code van anderen over te nemen. Ik ben me ervan bewust dat:
+                 - Er (geautomatiseerd) op fraude wordt gescand
+                 - Verdachte situaties worden gemeld aan de examencommissie
+                 - Fraude kan leiden tot het ongeldig verklaren van deze practicumopdracht voor alle studenten
+                 Door 'YES_I_ACCEPT' in de Main-class op 'true' te zetten, onderteken ik deze verklaring.""";
 
-                        "Ik ben me ervan bewust dat:\n" +
-                        "\t- Er (geautomatiseerd) op fraude wordt gescanned\n" +
-                        "\t- Verdachte situaties worden gemeld aan de examencommissie\n" +
-                        "\t- Fraude kan leiden tot het ongeldig verklaren van deze practicumopdracht voor alle studenten\n\n" +
+        System.out.println(Integriteitsverklaring);
+    }
 
-                        "Door 'YES_I_ACCEPT' in de Main-class op 'true' te zetten, onderteken ik deze verklaring.";
+    private static boolean attemptSingleInstanceLock(int port) {
+        try {
+            // Keep the server socket open for the entire duration of the application
+            serverSocket = new ServerSocket(port);
+            if (DEBUG) {
+                System.out.printf("Application started on port %d.%n", port);
+            }
 
-        System.out.println(integriteitsVerklaring);
+            // Add a shutdown hook to release the port when the application exits
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    if (serverSocket != null && !serverSocket.isClosed()) {
+                        serverSocket.close();
+                        if (DEBUG) {
+                            System.out.printf("Releasing port %d on exit.%n", port);
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error releasing the server socket on application exit: " + e.getMessage());
+                }
+            }));
+            return true;
+        } catch (IOException e) {
+            System.err.printf("Error: Another instance of the application is already running on port %d.%n", port);
+            return false;
+        }
+    }
+
+    private static int loadPortFromConfig() {
+        Properties properties = new Properties();
+        // Default port if the config file is missing or incorrect
+        int defaultPort = 51152;
+
+        try (
+                InputStream inputStream = FileUtils.openInputStream(CONFIG_FILE);
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+        ) {
+            properties.load(bufferedReader);
+            return Integer.parseInt(properties.getProperty("port", String.valueOf(defaultPort)));
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Could not load port from config file, using default port: " + defaultPort);
+            return defaultPort;
+        }
     }
 
     // Getters
