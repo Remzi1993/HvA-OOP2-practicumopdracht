@@ -1,7 +1,7 @@
 # PowerShell script for automating the HvA JavaFX project packaging process.
 
 # Define the app version as a variable
-$appVersion = "2.0.2"
+$appVersion = "2.0.3"
 $appWebsite = "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht"
 $appReleases = "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht/releases"
 
