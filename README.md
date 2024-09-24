@@ -6,9 +6,9 @@ De vorige versie maakte geen gebruik van Java Modules.
 Deze versie maakt gebruik van recente Java standaarden en gebruikt Java Modules, jlink en jpackage om een runtime image en een installer te genereren.
 
 ## Demo
-![Screenshot 2024-09-22 034414](https://github.com/user-attachments/assets/3d5c3f98-0d5f-406c-a1d6-a482af43a5a0)
-![Screenshot 2024-09-22 034445](https://github.com/user-attachments/assets/5faa5704-6967-48cc-bbae-6d9a88e323e3)
-![Screenshot 2024-09-22 034523](https://github.com/user-attachments/assets/e86e9070-069f-47c6-922e-99d56499d994)
+![Screenshot 2024-09-23 112638](https://github.com/user-attachments/assets/67478baa-f9e1-4102-8ad7-5709bef4aabb)
+![Screenshot 2024-09-23 112658](https://github.com/user-attachments/assets/cd77e584-b449-4f88-b240-8baf2443adec)
+![Screenshot 2024-09-23 112735](https://github.com/user-attachments/assets/bc04f7d2-7c35-4018-8fa9-d42978d2f38c)
 
 ## Packaging voor Windows
 Gebruik het PowerShell-script `.\package.ps1` om automatisch een installer voor Windows te genereren. 
