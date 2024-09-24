@@ -46,7 +46,7 @@ public class MainApplication extends Application {
     private static TicketDAO ticketDAO;
     // For DAOs - the directory the application data is stored in
     private static String APP_DATA_DIRECTORY;
-    public static final String APP_VERSION = "2.0.3";
+    public static final String APP_VERSION = "2.0.4";
     private final Image APP_ICON;
     private static final String APP_CSS = Objects.requireNonNull(
             MainApplication.class.getResource("style.css")).toExternalForm();

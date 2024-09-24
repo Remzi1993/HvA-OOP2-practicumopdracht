@@ -30,3 +30,5 @@
 - Upgraded to Java and JavaFX 23. Improved instance locking.
 ## 2.0.3
 - Enabled signing of commits and version releases with GPG
+## 2.0.4
+- Added UUID and EULA to the Windows installer

@@ -1,9 +1,10 @@
 # PowerShell script for automating the HvA JavaFX project packaging process.
 
 # Define the app version as a variable
-$appVersion = "2.0.3"
+$appVersion = "2.0.4"
 $appWebsite = "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht"
 $appReleases = "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht/releases"
+$uuid = "5b9f447c-baa5-4751-b7c7-2667a78f63ea"
 
 # Step 1: Run the Maven wrapper script to ensure the correct version of Maven is used
 Write-Host "Running Maven wrapper script..."
@@ -61,6 +62,8 @@ jpackage `
     --win-update-url $appReleases `
     --runtime-image .\JRE\ `
     --install-dir "Remzi Cavdar\HvA OOP2 practicumopdracht" `
+    --license-file .\LICENSE `
+    --win-upgrade-uuid $uuid `
     --dest .\out
 
 Write-Host "Installer created and saved in the 'out' directory."
