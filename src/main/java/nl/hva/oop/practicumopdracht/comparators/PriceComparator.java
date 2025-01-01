@@ -1,7 +1,6 @@
 package nl.hva.oop.practicumopdracht.comparators;
 
 import nl.hva.oop.practicumopdracht.models.Ticket;
-
 import java.util.Comparator;
 
 public class PriceComparator implements Comparator<Ticket> {

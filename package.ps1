@@ -1,10 +1,11 @@
 # PowerShell script for automating the HvA JavaFX project packaging process.
 
 # Define the app version as a variable
-$appVersion = "2.0.4"
+$appVersion = "2.0.5"
 $appWebsite = "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht"
 $appReleases = "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht/releases"
 $uuid = "5b9f447c-baa5-4751-b7c7-2667a78f63ea"
+$DEBUG = $false
 
 # Step 1: Run the Maven wrapper script to ensure the correct version of Maven is used
 Write-Host "Running Maven wrapper script..."
@@ -43,7 +44,38 @@ Get-ChildItem -Path "target" -Exclude "practicumopdracht-$appVersion-jar-with-de
 
 # Step 7: Use jpackage to create an installer
 Write-Host "Creating installer using jpackage..."
-jpackage `
+
+if ($DEBUG)
+{
+    Write-Host "DEBUG mode enabled."
+    jpackage `
+    --input target `
+    --name "HvA OOP2 practicumopdracht" `
+    --main-class nl.hva.oop.practicumopdracht.Main `
+    --main-jar practicumopdracht-$appVersion-jar-with-dependencies.jar `
+    --type msi `
+    --icon .\src\main\resources\nl\hva\oop\practicumopdracht\images\icon.ico `
+    --win-menu `
+    --win-shortcut `
+    --win-shortcut-prompt `
+    --vendor "Remzi Cavdar" `
+    --win-menu-group "Remzi Cavdar" `
+    --copyright "Remzi Cavdar - MIT license" `
+    --description "HvA OOP2 practicumopdracht JavaFX app" `
+    --app-version $appVersion `
+    --win-help-url $appWebsite `
+    --win-update-url $appReleases `
+    --runtime-image .\JRE\ `
+    --install-dir "Remzi Cavdar\HvA OOP2 practicumopdracht" `
+    --license-file .\LICENSE `
+    --win-upgrade-uuid $uuid `
+    --dest .\out `
+    --win-console `
+    --java-options "-DDEBUG=true"
+}
+else
+{
+    jpackage `
     --input target `
     --name "HvA OOP2 practicumopdracht" `
     --main-class nl.hva.oop.practicumopdracht.Main `
@@ -65,6 +97,7 @@ jpackage `
     --license-file .\LICENSE `
     --win-upgrade-uuid $uuid `
     --dest .\out
+}
 
 Write-Host "Installer created and saved in the 'out' directory."
 

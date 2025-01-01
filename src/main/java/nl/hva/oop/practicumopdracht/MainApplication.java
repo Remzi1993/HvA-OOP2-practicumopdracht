@@ -10,14 +10,11 @@ import javafx.stage.Stage;
 import nl.hva.oop.practicumopdracht.controllers.Controller;
 import nl.hva.oop.practicumopdracht.controllers.PersonController;
 import nl.hva.oop.practicumopdracht.data.*;
-
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import static nl.hva.oop.practicumopdracht.Main.*;
 
@@ -40,22 +37,13 @@ public class MainApplication extends Application {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static Stage stage;
     private static Scene scene;
+    private final Image APP_ICON;
+    private static final String APP_CSS = Objects.requireNonNull(
+            MainApplication.class.getResource("style.css")).toExternalForm();
     // PersonDAO - MasterDAO
     private static PersonDAO personDAO;
     // TicketDAO - DetailDAO
     private static TicketDAO ticketDAO;
-    // For DAOs - the directory the application data is stored in
-    private static String APP_DATA_DIRECTORY;
-    public static final String APP_VERSION = "2.0.4";
-    private final Image APP_ICON;
-    private static final String APP_CSS = Objects.requireNonNull(
-            MainApplication.class.getResource("style.css")).toExternalForm();
-    /**
-     * Global debug setting for getting (extra) error and/or success messages in the console. Turn off for production.
-     * This is a global setting for the entire application.
-     * Artifact cannot be built with this setting on.
-     */
-    public static final boolean DEBUG = false;
 
     public MainApplication() {
         try (InputStream inputStream = MainApplication.class.getResourceAsStream("images/icon.png")) {
@@ -65,17 +53,6 @@ public class MainApplication extends Application {
             APP_ICON = new Image(inputStream);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the application icon.", e);
-        }
-
-        String os = System.getProperty("os.name").toUpperCase();
-        String appFolder = "Remzi Cavdar" + File.separator + "HvA OOP2 practicumopdracht";
-
-        if (os.contains("WIN")) {
-            // Correctly get the APPDATA folder and append the app folder
-            APP_DATA_DIRECTORY = System.getenv("APPDATA") + File.separator + appFolder;
-        } else {
-            // For non-Windows OS, get the user home and append the app folder
-            APP_DATA_DIRECTORY = System.getProperty("user.home") + File.separator + appFolder;
         }
     }
 
@@ -97,7 +74,7 @@ public class MainApplication extends Application {
             }
 
             // Output the default charset and locale
-            System.out.printf("Resources directory: %s%nDefault charset: %s%nDefault locale: %s%n",
+            System.out.printf("%nResources directory: %s%nDefault charset: %s%nDefault locale: %s%n",
                     resourcePath, Charset.defaultCharset().displayName(), Locale.getDefault().getDisplayName());
         }
 
@@ -110,8 +87,8 @@ public class MainApplication extends Application {
         stage.setMinWidth(WIDTH);
         stage.setMinHeight(HEIGHT);
 
-        personDAO = new BinaryPersonDAO();
-        ticketDAO = new ObjectTicketDAO();
+        personDAO = new DummyPersonDAO();
+        ticketDAO = new DummyTicketDAO();
         try {
             personDAO.load();
             ticketDAO.load();
@@ -194,9 +171,5 @@ public class MainApplication extends Application {
 
     public static double getMaxWidthScreen() {
         return VISUAL_BOUNDS.getWidth();
-    }
-
-    public static String getAppDataDirectory() {
-        return APP_DATA_DIRECTORY;
     }
 }

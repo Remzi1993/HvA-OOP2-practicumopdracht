@@ -2,10 +2,11 @@ package nl.hva.oop.practicumopdracht.data;
 
 import nl.hva.oop.practicumopdracht.models.Ticket;
 import org.apache.commons.io.FileUtils;
-
 import java.io.*;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
+import static nl.hva.oop.practicumopdracht.Main.getAppDataDirectory;
+import static nl.hva.oop.practicumopdracht.MainApplication.getPersonDAO;
 
-import static nl.hva.oop.practicumopdracht.MainApplication.*;
 
 /**
  * ObjectTicketDAO - ObjectDetailDAO

@@ -2,17 +2,15 @@ package nl.hva.oop.practicumopdracht;
 
 import javafx.application.Application;
 import nl.hva.oop.practicumopdracht.utils.Preloader;
-import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Properties;
-import static nl.hva.oop.practicumopdracht.MainApplication.DEBUG;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Main class for starting up the JavaFX application with a call to launch MainApplication.
- *
  * @author Remzi Cavdar - remzi.cavdar@hva.nl
  */
 public class Main {
@@ -21,8 +19,16 @@ public class Main {
     private static final boolean YES_I_ACCEPT = true;
     public static boolean launchedFromMain;
     private static final boolean PRELOADER = false;
-    private static final File CONFIG_FILE = new File("data/config.properties");
+    private static String APP_DATA_DIRECTORY;
     private static ServerSocket serverSocket;
+    private static final int DEFAULT_PORT_MIN = 1024;
+    private static final int DEFAULT_PORT_MAX = 65535;
+    public static final String APP_VERSION = "2.0.5";
+    /**
+     * This is a global setting for the entire application for getting error and/or success messages in the console.
+     * Set in jpackage --java-options "-DDEBUG=true/false"
+     */
+    public static final boolean DEBUG = Boolean.getBoolean("DEBUG") || true;
 
     public static void main(String[] args) {
         if (!YES_I_ACCEPT) {
@@ -30,6 +36,21 @@ public class Main {
             return;
         }
         launchedFromMain = true;
+
+        if (DEBUG) {
+            System.out.println("App config:");
+        }
+
+        String os = System.getProperty("os.name").toUpperCase();
+        String appFolder = "Remzi Cavdar" + File.separator + "HvA OOP2 practicumopdracht";
+
+        if (os.contains("WIN")) {
+            // Correctly get the APPDATA folder and append the app folder
+            APP_DATA_DIRECTORY = System.getenv("APPDATA") + File.separator + appFolder;
+        } else {
+            // For non-Windows OS, get the user home and append the app folder
+            APP_DATA_DIRECTORY = System.getProperty("user.home") + File.separator + appFolder;
+        }
 
         int port = loadPortFromConfig();
 
@@ -44,6 +65,7 @@ public class Main {
         if (PRELOADER) {
             System.setProperty("javafx.preloader", Preloader.class.getName());
         }
+
         Application.launch(MainApplication.class, args);
     }
 
@@ -63,6 +85,90 @@ public class Main {
                  Door 'YES_I_ACCEPT' in de Main-class op 'true' te zetten, onderteken ik deze verklaring.""";
 
         System.out.println(Integriteitsverklaring);
+    }
+
+    private static int generateRandomPort() {
+        return ThreadLocalRandom.current().nextInt(DEFAULT_PORT_MIN, DEFAULT_PORT_MAX + 1);
+    }
+
+    private static boolean isPortAvailable(int port) {
+        try (ServerSocket ignored = new ServerSocket(port)) {
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public static int getAvailablePort() {
+        int port;
+        do {
+            port = generateRandomPort();
+        } while (!isPortAvailable(port)); // Repeat until an available port is found
+        return port;
+    }
+
+    private static int loadPortFromConfig() {
+        Properties properties = new Properties();
+        File configFile = new File(APP_DATA_DIRECTORY, "config.properties");
+
+        // Check if the config file exists
+        if (configFile.exists()) {
+            try (InputStream inputStream = new FileInputStream(configFile);
+                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+                properties.load(bufferedReader);
+                String portString = properties.getProperty("port");
+
+                if (portString != null) {
+                    int port = Integer.parseInt(portString);
+                    if (port >= DEFAULT_PORT_MIN && port <= DEFAULT_PORT_MAX) {
+                        return port; // Use the port from config without checking availability
+                    }
+                }
+            } catch (IOException | NumberFormatException e) {
+                if (DEBUG) {
+                    System.err.println("Invalid config file or port, generating a new one.");
+                }
+            }
+        }
+
+        // If no valid port is found in the config file, generate a new one
+        int newPort = getAvailablePort();
+        savePortToConfig(newPort);
+        return newPort;
+    }
+
+    private static void savePortToConfig(int port) {
+        Properties properties = new Properties();
+        properties.setProperty("port", String.valueOf(port));
+
+        File configFile = new File(APP_DATA_DIRECTORY, "config.properties");
+        File configDir = configFile.getParentFile(); // Get the directory
+
+        // Ensure the directory exists
+        if (!configDir.exists()) {
+            if (configDir.mkdirs()) {
+                if (DEBUG) {
+                    System.out.println("Created config directory: " + configDir.getAbsolutePath());
+                }
+            } else {
+                if (DEBUG) {
+                    System.err.println("Failed to create config directory: " + configDir.getAbsolutePath());
+                }
+                return;
+            }
+        }
+
+        // Save the port to the config file
+        try (OutputStream outputStream = new FileOutputStream(configFile)) {
+            properties.store(outputStream, "App config");
+            if (DEBUG) {
+                System.out.println("Port saved to config file: " + port);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to save port to config file: " + e.getMessage());
+        }
     }
 
     private static boolean attemptSingleInstanceLock(int port) {
@@ -93,24 +199,6 @@ public class Main {
         }
     }
 
-    private static int loadPortFromConfig() {
-        Properties properties = new Properties();
-        // Default port if the config file is missing or incorrect
-        int defaultPort = 51152;
-
-        try (
-                InputStream inputStream = FileUtils.openInputStream(CONFIG_FILE);
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
-        ) {
-            properties.load(bufferedReader);
-            return Integer.parseInt(properties.getProperty("port", String.valueOf(defaultPort)));
-        } catch (IOException | NumberFormatException e) {
-            System.out.println("Could not load port from config file, using default port: " + defaultPort);
-            return defaultPort;
-        }
-    }
-
     // Getters
     public static String getStudentName() {
         return STUDENT_NAME;
@@ -118,5 +206,9 @@ public class Main {
 
     public static int getStudentNumber() {
         return STUDENT_NUMBER;
+    }
+
+    public static String getAppDataDirectory() {
+        return APP_DATA_DIRECTORY;
     }
 }

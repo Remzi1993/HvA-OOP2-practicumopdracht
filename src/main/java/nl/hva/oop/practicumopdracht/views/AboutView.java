@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import nl.hva.oop.practicumopdracht.MainApplication;
 import nl.hva.oop.practicumopdracht.utils.Hyperlink;
 import java.io.InputStream;
-import static nl.hva.oop.practicumopdracht.MainApplication.APP_VERSION;
+import static nl.hva.oop.practicumopdracht.Main.APP_VERSION;
 
 /**
  * AboutView - The info and support view. This view shows the information about the application and the developer.

@@ -1,6 +1,6 @@
 package nl.hva.oop.practicumopdracht.utils;
 
-import nl.hva.oop.practicumopdracht.MainApplication;
+import nl.hva.oop.practicumopdracht.Main;
 
 /**
  * Utility class for checking if a string is numeric.
@@ -8,7 +8,7 @@ import nl.hva.oop.practicumopdracht.MainApplication;
  */
 public class IsNumeric {
     // Debug setting for getting error messages in the console
-    private static final boolean DEBUG = MainApplication.DEBUG;
+    private static final boolean DEBUG = Main.DEBUG;
 
     /**
      * @param string will be checked if it's an int.

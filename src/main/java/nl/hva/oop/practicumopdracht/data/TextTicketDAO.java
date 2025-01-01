@@ -9,8 +9,10 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Locale;
-
-import static nl.hva.oop.practicumopdracht.MainApplication.*;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
+import static nl.hva.oop.practicumopdracht.Main.getAppDataDirectory;
+import static nl.hva.oop.practicumopdracht.MainApplication.getDateTimeFormatter;
+import static nl.hva.oop.practicumopdracht.MainApplication.getPersonDAO;
 
 /**
  * TextPersonDAO - TextMasterDAO

@@ -25,6 +25,7 @@ import nl.hva.oop.practicumopdracht.views.View;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import static nl.hva.oop.practicumopdracht.MainApplication.*;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
 
 /**
  * TicketController - DetailController
@@ -219,6 +220,12 @@ public class TicketController extends Controller {
 
                 // Load data from data sources and confirm if successful
                 if (personDAO.load() && ticketDAO.load()) {
+                    // Update the observable list with the new data
+                    observableListPersons.setAll(personDAO.getAll());
+                    observableListTickets.setAll(ticketDAO.getAllFor(
+                            view.getComboBoxBelongsTo().getSelectionModel().getSelectedItem()
+                    ));
+
                     menuAlert(true, "Data succesvol opgehaald",
                             """
                                     De data is succesvol opgehaald.
@@ -227,18 +234,16 @@ public class TicketController extends Controller {
                     menuAlert(false, "Error bij laden data!",
                             "Er is een fout opgetreden tijdens het laden van de data.");
                 }
-
-                // Update the observable list with the new data
-                observableListPersons.setAll(personDAO.getAll());
-                observableListTickets.setAll(ticketDAO.getAllFor(
-                        view.getComboBoxBelongsTo().getSelectionModel().getSelectedItem()
-                ));
             } catch (FileNotFoundException e) {
+                alert = new AlertDialog("ERROR", "Fout bij laden data!",
+                        "Het bestand kon niet gevonden worden", alertDialogIcon, APP_CSS);
+                alert.show();
                 System.err.println("Couldn't load data!");
                 Platform.exit();
                 System.exit(0);
             } catch (Exception e) {
-                System.err.println("Something went wrong!");
+                System.err.println("Something went wrong while loading data!");
+                e.printStackTrace();
                 Platform.exit();
                 System.exit(0);
             }

@@ -4,7 +4,7 @@ import javafx.util.StringConverter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import static nl.hva.oop.practicumopdracht.MainApplication.DEBUG;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
 
 /**
  * JavaFX DatePicker converter

@@ -15,6 +15,9 @@ import static nl.hva.oop.practicumopdracht.MainApplication.getDateTimeFormatter;
 public class DummyPersonDAO extends PersonDAO {
     @Override
     public boolean load() {
+        // Clear the current list to avoid duplicates on reloading
+        persons.clear();
+
         // Name, Sex, Birthdate, Birthplace, Nationality, SSN, Document number
         persons.add(new Person("Remzi Cavdar", "Man",
                 LocalDate.parse("11-06-1993", getDateTimeFormatter()), "Amsterdam",

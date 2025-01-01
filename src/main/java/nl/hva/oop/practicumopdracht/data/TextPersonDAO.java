@@ -2,14 +2,14 @@ package nl.hva.oop.practicumopdracht.data;
 
 import nl.hva.oop.practicumopdracht.models.Person;
 import org.apache.commons.io.FileUtils;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Arrays;
-
-import static nl.hva.oop.practicumopdracht.MainApplication.*;
+import static nl.hva.oop.practicumopdracht.Main.getAppDataDirectory;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
+import static nl.hva.oop.practicumopdracht.MainApplication.getDateTimeFormatter;
 
 /**
  * TextPersonDAO - TextMasterDAO

@@ -2,11 +2,11 @@ package nl.hva.oop.practicumopdracht.data;
 
 import nl.hva.oop.practicumopdracht.models.Person;
 import org.apache.commons.io.FileUtils;
-
 import java.io.*;
 import java.time.LocalDate;
-
-import static nl.hva.oop.practicumopdracht.MainApplication.*;
+import static nl.hva.oop.practicumopdracht.Main.getAppDataDirectory;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
+import static nl.hva.oop.practicumopdracht.MainApplication.getDateTimeFormatter;
 
 /**
  * BinaryPersonDAO - BinaryMasterDAO

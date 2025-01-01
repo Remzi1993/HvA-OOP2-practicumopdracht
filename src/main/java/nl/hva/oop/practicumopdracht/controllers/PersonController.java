@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Objects;
 import static nl.hva.oop.practicumopdracht.MainApplication.*;
+import static nl.hva.oop.practicumopdracht.Main.DEBUG;
 
 /**
  * PersonController - MasterController
@@ -207,17 +208,25 @@ public class PersonController extends Controller {
             try {
                 // Load data from data sources and confirm if successful
                 if (personDAO.load() && ticketDAO.load()) {
+                    // Update the observable list with the new data
+                    observableListPersons.setAll(personDAO.getAll());
+
                     menuAlert(true, "Data succesvol opgehaald",
                             "De data is succesvol opgehaald.");
                 } else {
                     menuAlert(false, "Error bij laden data!",
                             "Er is een fout opgetreden tijdens het laden van de data.");
                 }
-
-                // Update the observable list with the new data
-                observableListPersons.setAll(personDAO.getAll());
             } catch (FileNotFoundException e) {
+                alert = new AlertDialog("ERROR", "Fout bij laden data!",
+                        "Het bestand kon niet gevonden worden", alertDialogIcon, APP_CSS);
+                alert.show();
                 System.err.println("Couldn't load data!");
+                Platform.exit();
+                System.exit(0);
+            } catch (Exception e) {
+                System.err.println("Something went wrong while loading data!");
+                e.printStackTrace();
                 Platform.exit();
                 System.exit(0);
             }

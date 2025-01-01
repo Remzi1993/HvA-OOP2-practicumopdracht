@@ -6,6 +6,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import nl.hva.oop.practicumopdracht.Main;
 import nl.hva.oop.practicumopdracht.MainApplication;
 
 /**
@@ -14,7 +15,7 @@ import nl.hva.oop.practicumopdracht.MainApplication;
  */
 public class Preloader extends javafx.application.Preloader {
     private static Stage stage;
-    private static final boolean DEBUG = MainApplication.DEBUG;
+    private static final boolean DEBUG = Main.DEBUG;
 
     private Scene getScene() {
         BorderPane borderPane = new BorderPane();

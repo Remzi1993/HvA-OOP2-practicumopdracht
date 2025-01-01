@@ -1,7 +1,6 @@
 package nl.hva.oop.practicumopdracht.data;
 
 import nl.hva.oop.practicumopdracht.models.Person;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;

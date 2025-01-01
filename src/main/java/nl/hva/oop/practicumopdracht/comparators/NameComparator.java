@@ -1,7 +1,6 @@
 package nl.hva.oop.practicumopdracht.comparators;
 
 import nl.hva.oop.practicumopdracht.models.Person;
-
 import java.util.Comparator;
 
 public class NameComparator implements Comparator<Person> {

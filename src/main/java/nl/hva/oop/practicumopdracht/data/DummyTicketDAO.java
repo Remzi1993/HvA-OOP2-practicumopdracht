@@ -16,6 +16,9 @@ import static nl.hva.oop.practicumopdracht.MainApplication.getPersonDAO;
 public class DummyTicketDAO extends TicketDAO {
     @Override
     public boolean load() {
+        // Clear the current list to avoid duplicates on reloading
+        tickets.clear();
+
         // belongsTo, destination, startDate, endDate, cost, checkedIn, description
         tickets.add(new Ticket(getPersonDAO().getById(0), "Ankara, Turkije",
                 LocalDate.parse("23-07-2022", getDateTimeFormatter()),
