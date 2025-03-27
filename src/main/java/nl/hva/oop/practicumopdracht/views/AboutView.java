@@ -34,57 +34,13 @@ public class AboutView {
         VBox vboxContainer = new VBox();
         vboxContainer.setAlignment(Pos.CENTER);
         vboxContainer.getStyleClass().add("about-view-vbox-container");
+
         // HBox container for the images
         HBox hbox = new HBox();
-
-        String path1 = "images/emoji/zany-face.gif";
-        ImageView img1;
-        try (InputStream inputStream = MainApplication.class.getResourceAsStream(path1)) {
-            if (inputStream == null) {
-                throw new IllegalArgumentException("File not found as resource: " + path1);
-            }
-            img1 = new ImageView(new Image(inputStream, 100, 100, true,
-                    true));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load the application icon.", e);
-        }
-
-        String path2 = "images/emoji/star-struck.gif";
-        ImageView img2;
-        try (InputStream inputStream = MainApplication.class.getResourceAsStream(path2)) {
-            if (inputStream == null) {
-                throw new IllegalArgumentException("File not found as resource: " + path2);
-            }
-            img2 = new ImageView(new Image(inputStream, 100, 100, true,
-                    true));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load the application icon.", e);
-        }
-
-        String path3 = "images/emoji/partying-face.gif";
-        ImageView img3;
-        try (InputStream inputStream = MainApplication.class.getResourceAsStream(path3)) {
-            if (inputStream == null) {
-                throw new IllegalArgumentException("File not found as resource: " + path3);
-            }
-            img3 = new ImageView(new Image(inputStream, 100, 100, true,
-                    true));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load the application icon.", e);
-        }
-
-        String path4 = "images/emoji/rocket.gif";
-        ImageView img4;
-        try (InputStream inputStream = MainApplication.class.getResourceAsStream(path4)) {
-            if (inputStream == null) {
-                throw new IllegalArgumentException("File not found as resource: " + path4);
-            }
-            img4 = new ImageView(new Image(inputStream, 100, 100, true,
-                    true));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load the application icon.", e);
-        }
-
+        ImageView img1 = createImageView("images/emoji/zany-face.gif", 100, 100);
+        ImageView img2 = createImageView("images/emoji/star-struck.gif", 100, 100);
+        ImageView img3 = createImageView("images/emoji/partying-face.gif", 100, 100);
+        ImageView img4 = createImageView("images/emoji/rocket.gif", 100, 100);
         hbox.setAlignment(Pos.CENTER);
         hbox.getChildren().addAll(img1, img2, img3, img4);
         hbox.getStyleClass().add("about-view-hbox");
@@ -150,5 +106,16 @@ public class AboutView {
         // Apply stylesheet
         scene.getStylesheets().add(MainApplication.getAppCSS());
         return scene;
+    }
+
+    private ImageView createImageView(String resourcePath, double width, double height) {
+        try (InputStream inputStream = MainApplication.class.getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException("File not found as resource: " + resourcePath);
+            }
+            return new ImageView(new Image(inputStream, width, height, true, true));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load image: " + resourcePath, e);
+        }
     }
 }
