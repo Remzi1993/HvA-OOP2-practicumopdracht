@@ -65,7 +65,7 @@ public class PersonController extends Controller {
             view.getDatePickerBirthdate().setValue(LocalDate.now().minusYears(18));
             view.getDatePickerBirthdate().getEditor().setText(getDateFormat().toUpperCase());
 
-            view.getDatePickerBirthdate().setOnAction(event -> {
+            view.getDatePickerBirthdate().setOnAction(_ -> {
                 if (view.getDatePickerBirthdate().getValue() == null) {
                     view.getDatePickerBirthdate().setValue(LocalDate.now().minusYears(18));
                     view.getDatePickerBirthdate().getEditor().setText(getDateFormat().toUpperCase());
@@ -74,7 +74,7 @@ public class PersonController extends Controller {
         }
 
         view.getListView().getSelectionModel().selectedItemProperty().addListener(
-                (observableValue, oldPerson, newPerson) -> {
+                (_, _, newPerson) -> {
                     if (newPerson != null) {
                         /* This is needed to remember the selected person in the listview, so we can give this to the
                          * TicketController when the switch button is pressed and when TicketView is displayed.
@@ -114,7 +114,7 @@ public class PersonController extends Controller {
         view.getMenuItemClose().setOnAction(this::handleMenuCloseButton);
         view.getMenuItemSortAZ().setOnAction(this::handleMenuSortAZButton);
         view.getMenuItemSortZA().setOnAction(this::handleMenuSortZAButton);
-        view.getMenuItemAbout().setOnAction(e -> new AboutView());
+        view.getMenuItemAbout().setOnAction(_ -> new AboutView());
 
         // Buttons
         view.getSaveButton().setOnAction(this::handleSaveButton);
@@ -144,7 +144,7 @@ public class PersonController extends Controller {
         // Set the Date in the Prompt
         birthdate.setPromptText(getDateFormat().toUpperCase());
 
-        birthdate.focusedProperty().addListener((observable, wasFocused, isFocused) -> {
+        birthdate.focusedProperty().addListener((_, _, isFocused) -> {
             if (!isFocused) {
                 try {
                     // Set typed text to DatePicker value
@@ -156,7 +156,7 @@ public class PersonController extends Controller {
             }
         });
 
-        birthdate.setDayCellFactory(picker -> new DateCell() {
+        birthdate.setDayCellFactory(_ -> new DateCell() {
             @Override
             public void updateItem(LocalDate item, boolean empty) {
                 super.updateItem(item, empty);

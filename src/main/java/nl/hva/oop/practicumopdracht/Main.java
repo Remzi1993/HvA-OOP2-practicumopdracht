@@ -92,7 +92,7 @@ public class Main {
     }
 
     private static boolean isPortAvailable(int port) {
-        try (ServerSocket ignored = new ServerSocket(port)) {
+        try (ServerSocket _ = new ServerSocket(port)) {
             return true;
         } catch (IOException e) {
             return false;
