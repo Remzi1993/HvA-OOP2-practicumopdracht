@@ -23,7 +23,7 @@ public class Main {
     private static ServerSocket serverSocket;
     private static final int DEFAULT_PORT_MIN = 1024;
     private static final int DEFAULT_PORT_MAX = 65535;
-    public static final String APP_VERSION = "2.0.5";
+    public static final String APP_VERSION = "2.0.6";
     /**
      * This is a global setting for the entire application for getting error and/or success messages in the console.
      * Set in jpackage --java-options "-DDEBUG=true/false"
