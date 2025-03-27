@@ -1,7 +1,6 @@
 # HvA Java practicumopdracht voor OOP2
 Dit project is een JavaFX applicatie die een master-detail functionaliteit implementeert. 
 De applicatie toont een lijst van personen met vliegtickets.
-Versie 1 van het project kan je vinden op https://github.com/Remzi1993/HvA-OOP2-practicumopdracht-v1
 De vorige versie maakte geen gebruik van Java Modules.
 Deze versie maakt gebruik van recente Java standaarden en gebruikt Java Modules, jlink en jpackage om een runtime image en een installer te genereren.
 
