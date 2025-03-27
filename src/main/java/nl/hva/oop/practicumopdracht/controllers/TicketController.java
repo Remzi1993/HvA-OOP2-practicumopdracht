@@ -67,7 +67,7 @@ public class TicketController extends Controller {
         view.getMenuItemSave().setOnAction(this::handleMenuSaveButton);
         view.getMenuItemLoad().setOnAction(this::handleMenuLoadButton);
         view.getMenuItemClose().setOnAction(this::handleMenuCloseButton);
-        view.getMenuItemAbout().setOnAction(e -> new AboutView());
+        view.getMenuItemAbout().setOnAction(_ -> new AboutView());
 
         // Buttons
         view.getSaveButton().setOnAction(this::handleSaveButton);
@@ -96,7 +96,7 @@ public class TicketController extends Controller {
         view.getListView().setItems(observableListTickets);
 
         view.getComboBoxBelongsTo().getSelectionModel().selectedItemProperty().addListener(
-                (observableValue, oldBelongsTo, newBelongsTo) -> {
+                (_, _, newBelongsTo) -> {
                     if (newBelongsTo != null) {
                         /* This is needed to remember the selected person in the combobox, so we can give this to the
                          * PersonController when the switch button is pressed and when PersonView is displayed.
@@ -118,7 +118,7 @@ public class TicketController extends Controller {
         );
 
         view.getListView().getSelectionModel().selectedItemProperty().addListener((
-                observableValue, oldTicket, newTicket) -> {
+                _, _, newTicket) -> {
             if (newTicket != null) {
                 getInputDataFromView();
                 destination.setText(newTicket.getDestination());
@@ -150,7 +150,7 @@ public class TicketController extends Controller {
         startDate.setPromptText(getDateFormat().toUpperCase());
         endDate.setPromptText(getDateFormat().toUpperCase());
 
-        startDate.focusedProperty().addListener((observable, wasFocused, isFocused) -> {
+        startDate.focusedProperty().addListener((_, _, isFocused) -> {
             if (!isFocused) {
                 try {
                     // Set typed text to DatePicker value
@@ -162,7 +162,7 @@ public class TicketController extends Controller {
             }
         });
 
-        endDate.focusedProperty().addListener((observable, wasFocused, isFocused) -> {
+        endDate.focusedProperty().addListener((_, _, isFocused) -> {
             if (!isFocused) {
                 try {
                     // Set typed text to DatePicker value

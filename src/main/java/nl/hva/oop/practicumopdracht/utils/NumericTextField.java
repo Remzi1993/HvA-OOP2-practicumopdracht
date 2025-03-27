@@ -31,7 +31,7 @@ public class NumericTextField extends TextField {
         DECIMAL_FORMAT_SYMBOLS.setGroupingSeparator(GROUPING_SEPARATOR);
 
         if (IS_DECIMAL) {
-            this.textProperty().addListener((observable, oldValue, newValue) -> {
+            this.textProperty().addListener((_, oldValue, newValue) -> {
                 if (!DECIMAL_PATTERN.matcher(newValue).matches()) {
                     this.setText(oldValue);
                 }
@@ -42,7 +42,7 @@ public class NumericTextField extends TextField {
                 }
             });
         } else {
-            this.textProperty().addListener((observable, oldValue, newValue) -> {
+            this.textProperty().addListener((_, oldValue, newValue) -> {
                 if (!INTEGER_PATTERN.matcher(newValue).matches()) {
                     this.setText(oldValue);
                 }
