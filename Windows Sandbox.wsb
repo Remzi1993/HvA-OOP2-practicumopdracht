@@ -1,8 +1,0 @@
-<Configuration>
-	<MappedFolders>
-		<MappedFolder>
-			<HostFolder>%USERPROFILE%\Projects\Java\HvA-OOP2-practicumopdracht\out</HostFolder>
-			<ReadOnly>true</ReadOnly>
-		</MappedFolder>
-	</MappedFolders>
-</Configuration>
