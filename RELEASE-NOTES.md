@@ -32,3 +32,12 @@
 - Enabled signing of commits and version releases with GPG
 ## 2.0.4
 - Added UUID and EULA to the Windows installer
+## 2.0.7
+- Upgraded to Java 24 and JavaFX 24
+- Improved build system with centralized version management
+- Enhanced Windows installer with automatic data preservation during upgrades
+- Streamlined installation experience with fewer user prompts
+- Added multilingual support (English and Dutch) in the installer
+- Windows installer now properly enforces 64-bit architecture requirements
+- Optimized application runtime with custom Java runtime image
+- Improved single instance application locking mechanism
