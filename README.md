@@ -1,33 +1,65 @@
-# HvA Java practicumopdracht voor OOP2
-Dit project is een JavaFX applicatie die een master-detail functionaliteit implementeert. 
-De applicatie toont een lijst van personen met vliegtickets.
-De vorige versie maakte geen gebruik van Java Modules.
-Deze versie maakt gebruik van recente Java standaarden en gebruikt Java Modules, jlink en jpackage om een runtime image en een installer te genereren.
+# HvA Java Practical Assignment for OOP2
+This project is a JavaFX application that implements a master-detail functionality.
+The application displays a list of people with flight tickets.
+The previous version did not use Java Modules.
+This version uses recent Java standards and utilizes Java Modules, jlink, and jpackage to generate a runtime image and an installer.
 
 ## Demo
 ![Screenshot 2024-09-23 112638](https://github.com/user-attachments/assets/67478baa-f9e1-4102-8ad7-5709bef4aabb)
 ![Screenshot 2024-09-23 112658](https://github.com/user-attachments/assets/cd77e584-b449-4f88-b240-8baf2443adec)
 ![Screenshot 2024-09-23 112735](https://github.com/user-attachments/assets/bc04f7d2-7c35-4018-8fa9-d42978d2f38c)
 
-## Packaging voor Windows
-Gebruik het PowerShell-script `.\package.ps1` om automatisch een installer voor Windows te genereren. 
-Het script voert verschillende stappen uit, waaronder het bouwen van een runtime image met jlink en het maken van een installer met jpackage.
-- Om de app versie te veranderen, pas de versie aan in `pom.xml`, `package.ps1` en `src\main\java\nl\hva\oop\practicumopdracht\MainApplication.java`.
+## Packaging for Windows
+Use the PowerShell script `.\package.ps1` to automatically generate an installer for Windows.
+The script performs several steps, including building a runtime image with jlink and creating an application image with jpackage.
 
-### Het script voert de volgende stappen uit:
-1. Run de Maven wrapper script om ervoor te zorgen dat de juiste versie van Maven wordt gebruikt.
-2. Het script begint met het verwijderen van de mappen `target`, `out`, en `JRE` via Maven: `./mvnw clean -Pall`
-3. Vervolgens wordt een runtime image gegenereerd met jlink via Maven: `./mvnw clean javafx:jlink`
-4. Na het genereren van het runtime image wordt de map `JRE` vanuit de `target` directory verplaatst naar de hoofdmap van het project.
-5. Met Maven wordt een .jar bestand inclusief dependencies aangemaakt: `./mvnw clean package`
-6. Alles in de `target` directory wordt verwijderd behalve de `jar-with-dependencies.jar` via Maven: `./mvnw clean`
-7. Als laatste wordt jpackage gebruikt om een Windows MSI installer te maken. Het commando dat hiervoor wordt uitgevoerd: `jpackage --input target --name "Practicumopdracht OOP2" --main-class nl.hva.oop.practicumopdracht.Main --main-jar practicumopdracht-2.0.0-jar-with-dependencies.jar --type msi --icon .\src\main\resources\nl\hva\oop\practicumopdracht\images\icon.ico --win-menu --win-shortcut --win-per-user-install --win-shortcut-prompt --vendor "Remzi Cavdar" --win-menu-group "Remzi Cavdar" --copyright "Remzi Cavdar" --description "HvA Java practicumopdracht voor OOP2" --app-version "2.0.0" --win-help-url "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht" --runtime-image .\JRE\ --dest .\out`
-8. De installer staat in de `out` directory. De mappen `JRE` en `target` wordt verwijderd na het maken van de installer.
+### Version Management
+To change the app version, update the version in the following file:
+- `pom.xml`
 
-## Testen van de installer
-Ik raad Windows Sandbox aan om de installer te testen.
-- Deze feature is beschikbaar op Windows 10 of 11 (alle edities behalve Home).
-- Schakel Windows Sandbox in via Windows-onderdelen.
-- In het mapje data is er dummy data voor de app (van elke datatype). Kopieer de data naar de map `%APPDATA%\Remzi Cavdar\HvA OOP2 practicumopdracht`
+### Packaging Process
+The script performs the following key steps:
+1. Clean all existing build directories using Maven
+2. Generate a runtime image with jlink via Maven
+3. Move the JRE directory to the project root
+4. Package the project with dependencies
+5. Clean the target directory
+6. Create an application image using jpackage
+7. Generate an Inno Setup installer script
+8. Clean up temporary directories
 
-Als je Windows Sandbox niet hebt of niet wilt gebruiken kan je de installer ook testen op een virtuele machine of op je eigen computer.
+## Testing the Installer
+There are several recommended methods for testing the installer:
+
+1. **Virtual Machine**:
+    - Use virtualization software like VirtualBox, VMware, or Hyper-V
+    - Create a clean Windows 10 or 11 test environment
+    - Install the application and verify functionality
+
+2. **Separate User Account**:
+    - Create a new local user account on your Windows machine
+    - Install the application in this separate account
+    - Test the full installation and application functionality
+
+3. **Staging Computer**:
+    - Use a dedicated test computer or a spare machine
+    - Perform a clean installation and thorough testing
+
+### Testing Best Practices
+- Verify the installer runs without errors
+- Check that the application launches correctly
+- Test all main features of the application
+- Confirm that user data is preserved between updates
+
+Note: In the `data` folder, you'll find dummy data for the app (for each data type). When testing, you can copy this data to the `%APPDATA%\Remzi Cavdar\HvA OOP2 practicumopdracht` directory to simulate a real-world scenario.
+
+## System Requirements
+
+### User Requirements
+- Operating System: Windows 10 or higher (64-bit only)
+
+### Development Requirements
+- Operating System: Windows 10 or later (64-bit)
+- Java Development Kit (JDK) with JavaFX support
+- Maven
+- Inno Setup (for creating Windows installers)
