@@ -41,3 +41,5 @@
 - Windows installer now properly enforces 64-bit architecture requirements
 - Optimized application runtime with custom Java runtime image
 - Improved single instance application locking mechanism
+## 2.0.8
+- Add versioning and copyright information to the Inno Setup script.
