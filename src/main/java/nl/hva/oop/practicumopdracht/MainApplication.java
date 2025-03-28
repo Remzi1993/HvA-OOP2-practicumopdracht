@@ -87,8 +87,8 @@ public class MainApplication extends Application {
         stage.setMinWidth(WIDTH);
         stage.setMinHeight(HEIGHT);
 
-        personDAO = new DummyPersonDAO();
-        ticketDAO = new DummyTicketDAO();
+        personDAO = new BinaryPersonDAO();
+        ticketDAO = new ObjectTicketDAO();
         try {
             personDAO.load();
             ticketDAO.load();

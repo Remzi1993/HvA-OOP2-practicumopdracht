@@ -23,7 +23,23 @@ public class Main {
     private static ServerSocket serverSocket;
     private static final int DEFAULT_PORT_MIN = 1024;
     private static final int DEFAULT_PORT_MAX = 65535;
-    public static final String APP_VERSION = "2.0.6";
+
+    // Load app version from properties file
+    private static String loadAppVersion() {
+        try (InputStream input = Main.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (input == null) {
+                return "unknown";
+            }
+            Properties props = new Properties();
+            props.load(input);
+            return props.getProperty("app.version", "unknown");
+        } catch (IOException e) {
+            return "unknown";
+        }
+    }
+
+    public static final String APP_VERSION = loadAppVersion();
+
     /**
      * This is a global setting for the entire application for getting error and/or success messages in the console.
      * Set in jpackage --java-options "-DDEBUG=true/false"
@@ -39,6 +55,7 @@ public class Main {
 
         if (DEBUG) {
             System.out.println("App config:");
+            System.out.println("App version: " + APP_VERSION);
         }
 
         String os = System.getProperty("os.name").toUpperCase();

@@ -6,15 +6,15 @@
 
     <groupId>nl.hva.oop</groupId>
     <artifactId>practicumopdracht</artifactId>
-    <version>2.0.6</version>
+    <version>2.0.7</version>
     <name>practicumopdracht</name>
 
     <properties>
-        <app.version>2.0.5</app.version>
+        <app.version>2.0.7</app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.0</junit.version>
-        <java.version>23</java.version>
-        <javafx.version>23</javafx.version>
+        <java.version>24</java.version>
+        <javafx.version>24</javafx.version>
         <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     </properties>
@@ -77,6 +77,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
