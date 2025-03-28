@@ -44,7 +44,7 @@ public class Main {
      * This is a global setting for the entire application for getting error and/or success messages in the console.
      * Set in jpackage --java-options "-DDEBUG=true/false"
      */
-    public static final boolean DEBUG = Boolean.getBoolean("DEBUG") || true;
+    public static final boolean DEBUG = Boolean.getBoolean("DEBUG");
 
     public static void main(String[] args) {
         if (!YES_I_ACCEPT) {

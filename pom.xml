@@ -6,11 +6,11 @@
 
     <groupId>nl.hva.oop</groupId>
     <artifactId>practicumopdracht</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.8</version>
     <name>practicumopdracht</name>
 
     <properties>
-        <app.version>2.0.7</app.version>
+        <app.version>2.0.8</app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.11.0</junit.version>
         <java.version>24</java.version>
