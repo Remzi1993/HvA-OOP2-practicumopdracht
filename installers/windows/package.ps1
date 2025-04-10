@@ -1,4 +1,5 @@
 # PowerShell script for automating the HvA JavaFX project packaging process.
+# and generating an Inno Setup installer with the dynamic version from pom.xml.
 
 # Extract version from pom.xml
 [xml]$pomXml = Get-Content "..\..\pom.xml"
@@ -98,7 +99,6 @@ Set-Location $currentDir
 
 # Step 9: Clean up temporary input directory
 Remove-Item -Recurse -Force $inputDir
-
 Write-Host "App image created and saved in the 'package' directory."
 
 # Step 10: Remove the target and JRE directories
@@ -126,7 +126,9 @@ else
 
 Write-Host "Cleanup complete."
 
-# Create a version-specific Inno Setup script by replacing the version in the template
+# -------------------------------
+# Generate the Inno Setup Script
+# -------------------------------
 $innoSetupScript = @"
 ; windows-installer.iss
 ; Inno Setup Script for HvA OOP2 practicumopdracht
@@ -143,60 +145,73 @@ $innoSetupScript = @"
 #define MyAppGUID "5b9f447c-baa5-4751-b7c7-2667a78f63ea"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application.
-; Do not use the same AppId value in installers for other applications.
-AppId={{{#MyAppGUID}}
+AppId={{5b9f447c-baa5-4751-b7c7-2667a78f63ea}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 VersionInfoVersion={#MyAppFileVersion}
 VersionInfoDescription={#MyAppName} setup
 AppCopyright={#MyAppCopyright}
 VersionInfoCopyright={#MyAppCopyright}
-AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppName}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppUpdatesURL}
+
 ; Force 64-bit installation directory
 DefaultDirName={autopf64}\{#MyAppPublisher}\{#MyAppName}
+; Keep publisher's name for the Program Group
 DefaultGroupName={#MyAppPublisher}
+
 ; Skip directory selection
 DisableDirPage=yes
 ; Skip program group page
 DisableProgramGroupPage=yes
-; Skip the Ready to Install page (confirmation)
+; Skip Ready to Install page
 DisableReadyPage=yes
-; Keep the finished page (with launch option)
+; Show a Finished page
 DisableFinishedPage=no
+
 LicenseFile=..\..\LICENSE
 OutputDir=out
 OutputBaseFilename={#MyAppName}-{#MyAppVersion}-setup
 SetupIconFile=..\..\src\main\resources\nl\hva\oop\practicumopdracht\images\icon.ico
+
 Compression=lzma
 SolidCompression=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 WizardStyle=modern
-; Require administrator privileges (machine-wide installation)
+
+; Require admin privileges (machine-wide installation)
 PrivilegesRequired=admin
-; Allow user to select language
+
+; Show language selection dialog only on first install
 ShowLanguageDialog=yes
-; Only allow installation on 64-bit Windows
+
+; Only allow on 64-bit Windows, force 64-bit mode
 ArchitecturesAllowed=x64os
 ArchitecturesInstallIn64BitMode=x64os
+
 ; Minimum OS version (Windows 10)
 MinVersion=10.0
 
+; Use the previous language automatically during upgrades
+UsePreviousLanguage=yes
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
+Name: "dutch";  MessagesFile: "compiler:Languages\Dutch.isl"
 
 [CustomMessages]
 english.LaunchApp=Launch HvA OOP2 practicumopdracht
 english.UpgradeDetected=An existing installation of HvA OOP2 practicumopdracht was detected. It will be upgraded without loss of your data.
-english.OSVersionError=This application requires Windows 10 or later.
+english.OSVersionError=This application requires Windows 10 (64-bit) or later.
+english.DowngradeError=A newer version of HvA OOP2 practicumopdracht is already installed. Downgrading is not supported.
+
 dutch.LaunchApp=Start HvA OOP2 practicumopdracht
 dutch.UpgradeDetected=Er is een bestaande installatie van HvA OOP2 practicumopdracht gedetecteerd. Deze zal worden bijgewerkt zonder verlies van uw gegevens.
-dutch.OSVersionError=Deze applicatie vereist Windows 10 of hoger.
+dutch.OSVersionError=Deze applicatie vereist Windows 10 (64-bit) of hoger.
+dutch.DowngradeError=Er is al een nieuwere versie van HvA OOP2 practicumopdracht geïnstalleerd. Downgraden wordt niet ondersteund.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -206,10 +221,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: ".\package\{#MyAppName}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-; Create a direct shortcut in the Start Menu Programs folder
+; Shortcut directly in "C:\ProgramData\Microsoft\Windows\Start Menu\Programs"
 Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-; Desktop shortcut (still optional)
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
+; Optional Desktop shortcut (if user selects "desktopicon")
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: "desktopicon"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchApp}"; Flags: nowait postinstall skipifsilent
@@ -219,112 +235,275 @@ Type: filesandordirs; Name: "{app}"
 
 [Code]
 const
-  AppDataDir = '{userappdata}\Remzi Cavdar\HvA OOP2 practicumopdracht';
+  ApplicationDataDirectory = '{userappdata}\Remzi Cavdar\HvA OOP2 practicumopdracht';
 
-// Function to check if a previous installation exists
-function GetUninstallString(): String;
+function IsOperatingSystemWindows10OrLater(): Boolean;
 var
-  sUnInstPath: String;
-  sUnInstallString: String;
+  OperatingSystemVersion: TWindowsVersion;
 begin
-  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
-  sUnInstallString := '';
-  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
-    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
-  Result := sUnInstallString;
+  GetWindowsVersionEx(OperatingSystemVersion);
+  Result := (OperatingSystemVersion.Major >= 10);
 end;
 
-// Function to determine if this is an upgrade
-function IsUpgrade(): Boolean;
+function IsOperatingSystem64Bit(): Boolean;
 begin
-  Result := (GetUninstallString() <> '');
+  Result := IsWin64;
 end;
 
-// Function to back up user data
-procedure BackupUserData();
+function GetPreviousUninstallCommand(): String;
 var
-  BackupDir: String;
-  ResultCode: Integer;
+  UninstallRegistryPath: String;
+  UninstallCommandLine: String;
 begin
-  if DirExists(ExpandConstant(AppDataDir)) then
+  UninstallRegistryPath := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{5b9f447c-baa5-4751-b7c7-2667a78f63ea}_is1';
+  UninstallCommandLine := '';
+
+  if not RegQueryStringValue(HKLM, UninstallRegistryPath, 'UninstallString', UninstallCommandLine) then
+    RegQueryStringValue(HKCU, UninstallRegistryPath, 'UninstallString', UninstallCommandLine);
+
+  Result := UninstallCommandLine;
+end;
+
+function GetCurrentlyInstalledVersion(): String;
+var
+  UninstallRegistryPath: String;
+  InstalledDisplayVersion: String;
+begin
+  UninstallRegistryPath := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{5b9f447c-baa5-4751-b7c7-2667a78f63ea}_is1';
+  InstalledDisplayVersion := '';
+
+  if not RegQueryStringValue(HKLM, UninstallRegistryPath, 'DisplayVersion', InstalledDisplayVersion) then
+    RegQueryStringValue(HKCU, UninstallRegistryPath, 'DisplayVersion', InstalledDisplayVersion);
+
+  Result := InstalledDisplayVersion;
+end;
+
+function IsExistingInstallationUpgrade(): Boolean;
+begin
+  Result := (GetPreviousUninstallCommand() <> '');
+end;
+
+function CompareTwoVersionStrings(Version1, Version2: String): Integer;
+var
+  Version1Part, Version2Part: String;
+  Version1Position, Version2Position: Integer;
+  Version1DotPosition, Version2DotPosition: Integer;
+  Number1, Number2: Integer;
+begin
+  Result := 0;
+  if Version1 = Version2 then Exit;
+
+  Version1Position := 1;
+  Version2Position := 1;
+
+  while (Version1Position <= Length(Version1)) and (Version2Position <= Length(Version2)) do
   begin
-    // Create a temporary backup directory
-    BackupDir := ExpandConstant('{tmp}\AppDataBackup');
-    if not DirExists(BackupDir) then
-      CreateDir(BackupDir);
+    Version1DotPosition := Pos('.', Copy(Version1, Version1Position, Length(Version1)));
+    if Version1DotPosition > 0 then
+      Version1DotPosition := Version1DotPosition + Version1Position - 1
+    else
+      Version1DotPosition := Length(Version1) + 1;
 
-    // Use xcopy to copy the app data directory to the backup
-    Exec('cmd.exe', '/c xcopy "' + ExpandConstant(AppDataDir) + '" "' + BackupDir + '" /E /I /H /Y',
-          '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Version2DotPosition := Pos('.', Copy(Version2, Version2Position, Length(Version2)));
+    if Version2DotPosition > 0 then
+      Version2DotPosition := Version2DotPosition + Version2Position - 1
+    else
+      Version2DotPosition := Length(Version2) + 1;
+
+    Version1Part := Copy(Version1, Version1Position, Version1DotPosition - Version1Position);
+    Version2Part := Copy(Version2, Version2Position, Version2DotPosition - Version2Position);
+
+    Number1 := StrToIntDef(Version1Part, 0);
+    Number2 := StrToIntDef(Version2Part, 0);
+
+    if Number1 > Number2 then
+    begin
+      Result := 1;
+      Exit;
+    end
+    else if Number1 < Number2 then
+    begin
+      Result := -1;
+      Exit;
+    end;
+
+    Version1Position := Version1DotPosition + 1;
+    Version2Position := Version2DotPosition + 1;
+  end;
+
+  if Version1Position <= Length(Version1) then
+    Result := 1
+  else if Version2Position <= Length(Version2) then
+    Result := -1;
+end;
+
+function IsCurrentInstallDowngrade(): Boolean;
+var
+  InstalledVersion: String;
+  CompareResult: Integer;
+begin
+  Result := False;
+  InstalledVersion := GetCurrentlyInstalledVersion();
+  if InstalledVersion <> '' then
+  begin
+    CompareResult := CompareTwoVersionStrings('{#MyAppVersion}', InstalledVersion);
+    Result := (CompareResult < 0);
   end;
 end;
 
-// Function to restore user data
-procedure RestoreUserData();
+procedure BackupApplicationData();
 var
-  BackupDir: String;
-  ResultCode: Integer;
+  BackupDirectory: String;
+  ReturnCode: Integer;
 begin
-  BackupDir := ExpandConstant('{tmp}\AppDataBackup');
-  if DirExists(BackupDir) then
+  if DirExists(ExpandConstant(ApplicationDataDirectory)) then
   begin
-    // Ensure target directory exists
-    if not DirExists(ExpandConstant(AppDataDir)) then
-      ForceDirectories(ExpandConstant(AppDataDir));
+    BackupDirectory := ExpandConstant('{tmp}\AppDataBackup');
+    if not DirExists(BackupDirectory) then
+      CreateDir(BackupDirectory);
 
-    // Use xcopy to restore the backup to the app data directory
-    Exec('cmd.exe', '/c xcopy "' + BackupDir + '" "' + ExpandConstant(AppDataDir) + '" /E /I /H /Y',
-          '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('cmd.exe',
+         '/c xcopy "' + ExpandConstant(ApplicationDataDirectory) + '" "' + BackupDirectory + '" /E /I /H /Y',
+         '',
+         SW_HIDE,
+         ewWaitUntilTerminated,
+         ReturnCode);
   end;
 end;
 
-// Called at the beginning of setup
+procedure RestoreApplicationData();
+var
+  BackupDirectory: String;
+  ReturnCode: Integer;
+begin
+  BackupDirectory := ExpandConstant('{tmp}\AppDataBackup');
+  if DirExists(BackupDirectory) then
+  begin
+    if not DirExists(ExpandConstant(ApplicationDataDirectory)) then
+      ForceDirectories(ExpandConstant(ApplicationDataDirectory));
+
+    Exec('cmd.exe',
+         '/c xcopy "' + BackupDirectory + '" "' + ExpandConstant(ApplicationDataDirectory) + '" /E /I /H /Y',
+         '',
+         SW_HIDE,
+         ewWaitUntilTerminated,
+         ReturnCode);
+  end;
+end;
+
 function InitializeSetup(): Boolean;
 var
-  iResultCode: Integer;
-  sUnInstallString: String;
+  UninstallerReturnCode: Integer;
+  UninstallCommandLine: String;
 begin
   Result := True;
 
-  if IsUpgrade() then
+  if not (IsOperatingSystemWindows10OrLater() and IsOperatingSystem64Bit()) then
   begin
-    // Inform the user that an upgrade is happening
+    MsgBox(ExpandConstant('{cm:OSVersionError}'), mbError, MB_OK);
+    Result := False;
+    Exit;
+  end;
+
+  if IsExistingInstallationUpgrade() and IsCurrentInstallDowngrade() then
+  begin
+    MsgBox(ExpandConstant('{cm:DowngradeError}'), mbError, MB_OK);
+    Result := False;
+    Exit;
+  end;
+
+  if IsExistingInstallationUpgrade() then
+  begin
     MsgBox(ExpandConstant('{cm:UpgradeDetected}'), mbInformation, MB_OK);
 
-    // Backup user data before uninstalling
-    BackupUserData();
+    BackupApplicationData();
 
-    // Uninstall previous version
-    sUnInstallString := GetUninstallString();
-    sUnInstallString := RemoveQuotes(sUnInstallString);
-
-    // Execute the uninstaller silently
-    Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode);
+    UninstallCommandLine := GetPreviousUninstallCommand();
+    UninstallCommandLine := RemoveQuotes(UninstallCommandLine);
+    Exec(UninstallCommandLine,
+         '/SILENT /NORESTART /SUPPRESSMSGBOXES',
+         '',
+         SW_HIDE,
+         ewWaitUntilTerminated,
+         UninstallerReturnCode);
   end;
 end;
 
-// Called at the end of the installation
+function ShouldSkipPage(PageID: Integer): Boolean;
+var
+  PreviousDesktopIconSetting: String;
+  RegistryPathForInstaller: String;
+begin
+  Result := False;
+
+  if IsExistingInstallationUpgrade() then
+  begin
+    if PageID in [wpLicense, wpSelectDir, wpSelectComponents, wpSelectProgramGroup, wpInfoBefore] then
+      Result := True;
+
+    if PageID = wpSelectTasks then
+    begin
+      RegistryPathForInstaller := ExpandConstant('Software\{#MyAppPublisher}\{#MyAppName}');
+      if RegQueryStringValue(HKLM, RegistryPathForInstaller, 'Installer_DesktopIcon', PreviousDesktopIconSetting) then
+      begin
+        if PreviousDesktopIconSetting = '1' then
+          WizardSelectTasks('desktopicon');
+      end;
+      Result := True;
+    end;
+  end;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  RegistryPathForInstaller: String;
 begin
   if CurStep = ssPostInstall then
   begin
-    if IsUpgrade() then
-      RestoreUserData();
+    RegistryPathForInstaller := ExpandConstant('Software\{#MyAppPublisher}\{#MyAppName}');
+
+    if ActiveLanguage = 'dutch' then
+      RegWriteStringValue(HKLM, RegistryPathForInstaller, 'Installer_Language', 'dutch')
+    else
+      RegWriteStringValue(HKLM, RegistryPathForInstaller, 'Installer_Language', 'english');
+
+    if WizardIsTaskSelected('desktopicon') then
+      RegWriteStringValue(HKLM, RegistryPathForInstaller, 'Installer_DesktopIcon', '1')
+    else
+      RegWriteStringValue(HKLM, RegistryPathForInstaller, 'Installer_DesktopIcon', '0');
+
+    if IsExistingInstallationUpgrade() then
+      RestoreApplicationData();
   end;
 end;
 
-// Called when the uninstaller runs
-procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+{------------------------------------------------------
+  Extra registry deletion for leftover keys on uninstall
+-------------------------------------------------------}
+procedure CurUninstallStepChanged(CurrentUninstallStep: TUninstallStep);
 begin
-  // If this is a regular uninstall (not an upgrade), remove app data
-  if CurUninstallStep = usUninstall then
+  if CurrentUninstallStep = usUninstall then
   begin
-    if DirExists(ExpandConstant(AppDataDir)) then
-      DelTree(ExpandConstant(AppDataDir), True, True, True);
+    if not IsExistingInstallationUpgrade() and DirExists(ExpandConstant(ApplicationDataDirectory)) then
+      DelTree(ExpandConstant(ApplicationDataDirectory), True, True, True);
+
+    RegDeleteValue(
+      HKCU,
+      'Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store',
+      'C:\Program Files\Remzi Cavdar\HvA OOP2 practicumopdracht\HvA OOP2 practicumopdracht.exe'
+    );
+
+    RegDeleteValue(
+      HKCU,
+      'Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store',
+      'C:\Program Files\Remzi Cavdar\HvA OOP2 practicumopdracht\unins000.exe'
+    );
+
+    RegDeleteKeyIncludingSubkeys(HKCU, 'Software\ChangeTracker');
   end;
 end;
 "@
 
-# Write the Inno Setup script
+# Finally, write the Inno Setup script to a file
 $innoSetupScript | Out-File -FilePath ".\windows-installer.iss" -Encoding utf8
-Write-Host "Generated Inno Setup script with version $appVersion"
+Write-Host "Generated updated Inno Setup script with version $appVersion"
