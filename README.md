@@ -19,14 +19,15 @@ To change the app version, update the version in the following file:
 
 ### Packaging Process
 The script performs the following key steps:
-1. Clean all existing build directories using Maven
-2. Generate a runtime image with jlink via Maven
-3. Move the JRE directory to the project root
-4. Package the project with dependencies
-5. Clean the target directory
-6. Create an application image using jpackage
-7. Generate an Inno Setup installer script
-8. Clean up temporary directories
+1. **Read and set version** from `pom.xml` (stores it in `$appVersion`).
+2. **Clean existing build artifacts** by removing `package`, `out`, and running `mvnw clean -Pall`.
+3. **Create a custom Java runtime** using `mvnw javafx:jlink` (places a JRE in `target\JRE`).
+4. **Move the JRE** to the project root (`..\..\JRE`) if it exists.
+5. **Build the “fat” JAR** using `mvnw clean package`, then **keep only** the `jar-with-dependencies`.
+6. **Create a fresh `input-dir`** and copy the fat JAR into it.
+7. **Use `jpackage`** to build an application image in `.\package`.
+8. **Clean up** by deleting temporary directories (`input-dir`, `target`, `JRE`, etc.).
+9. **Generate** a versioned **Inno Setup script** (`windows-installer.iss`) referencing `$appVersion`.
 
 ## Testing the Installer
 There are several recommended methods for testing the installer:
