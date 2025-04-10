@@ -214,7 +214,7 @@ dutch.OSVersionError=Deze applicatie vereist Windows 10 (64-bit) of hoger.
 dutch.DowngradeError=Er is al een nieuwere versie van HvA OOP2 practicumopdracht geïnstalleerd. Downgraden wordt niet ondersteund.
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
 ; Copy the entire app directory
