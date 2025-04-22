@@ -43,3 +43,5 @@
 - Improved single instance application locking mechanism
 ## 2.0.8
 - Add versioning and copyright information to the Inno Setup script.
+## 2.0.12
+- Improved Windows build script

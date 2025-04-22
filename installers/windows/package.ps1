@@ -1,134 +1,92 @@
-# PowerShell script for automating the HvA JavaFX project packaging process.
+# PowerShell script for automating the HvA JavaFX project Windows packaging process.
 # and generating an Inno Setup installer with the dynamic version from pom.xml.
 
-# Extract version from pom.xml
-[xml]$pomXml = Get-Content "..\..\pom.xml"
-$appVersion = $pomXml.project.version
+# 1) Resolve folders
+$ScriptRoot  = $PSScriptRoot
+$ProjectRoot = Resolve-Path (Join-Path $ScriptRoot '..\..')
+$CallerDir   = Get-Location
 
+# 2) Clean up previous build
+Write-Host "Cleaning up previous build ..."
+$issPath = Join-Path $ScriptRoot 'windows-installer.iss'
+if (Test-Path $issPath) { Remove-Item $issPath -Force; Write-Host "  • Removed windows-installer.iss" }
+foreach ($d in 'out','package') {
+  $p = Join-Path $ScriptRoot $d
+  if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Host "  • Removed $d directory" }
+}
+
+# 3) Read version from pom.xml
+[xml]$pomXml  = Get-Content (Join-Path $ProjectRoot 'pom.xml')
+$appVersion   = $pomXml.project.version
 Write-Host "Building application version: $appVersion"
 
-# Create package directory if it doesn't exist
-$packageDir = ".\package"
-$outDir = ".\out"
+# 4) Prepare out/ and package/
+$OutDir     = Join-Path $ScriptRoot 'out'
+$PackageDir = Join-Path $ScriptRoot 'package'
+New-Item -ItemType Directory -Force -Path $OutDir,$PackageDir | Out-Null
+Write-Host "Created out/ and package/ directories."
 
-# Remove existing out and package directories
-if (Test-Path $packageDir) {
-    Remove-Item -Recurse -Force $packageDir
-    Write-Host "Removed existing package directory."
-}
-
-if (Test-Path $outDir) {
-    Remove-Item -Recurse -Force $outDir
-    Write-Host "Removed existing out directory."
-}
-
-# Recreate the package directory
-New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
-Write-Host "Created package directory for output files."
-
-# Save current directory
-$currentDir = Get-Location
-
-# Step 1: Clean all directories (target, out, JRE) using Maven profile 'all'
-Write-Host "Cleaning all directories with Maven..."
-Set-Location ..\..\
+# 5) Run Maven clean -Pall  (wipes target etc.)
+Push-Location $ProjectRoot
 & ./mvnw clean -Pall
-Set-Location $currentDir
 
-# Step 2: Create a runtime image using jlink via Maven
-Write-Host "Creating runtime image with jlink..."
-Set-Location ..\..\
+# 6) Run jlink (creates target\JRE)
 & ./mvnw clean javafx:jlink
-Set-Location $currentDir
 
-# Step 3: Move JRE directory from target to project root if it exists
-if (Test-Path "..\..\target\JRE")
-{
-    Write-Host "Moving JRE directory to the root of the project..."
-    if (Test-Path "..\..\JRE")
-    {
-        Remove-Item -Recurse -Force "..\..\JRE"
-    }
-    Move-Item -Path "..\..\target\JRE" -Destination "..\..\JRE"
-}
-else
-{
-    Write-Host "JRE directory not found, skipping move step."
+# 7) Move runtime image out of target *before* any further clean
+$TargetDir = Join-Path $ProjectRoot 'target'
+$JreSrc    = Join-Path $TargetDir  'JRE'
+$JreDst    = Join-Path $ProjectRoot 'JRE'
+if (Test-Path $JreSrc) {
+  if (Test-Path $JreDst) { Remove-Item $JreDst -Recurse -Force }
+  Move-Item $JreSrc $JreDst
+  Write-Host "Moved runtime image → $JreDst"
+} else {
+  Write-Host "WARNING: runtime image not found in target\JRE"
 }
 
-# Step 4: Use Maven to package the project with dependencies
-Write-Host "Packaging project into jar-with-dependencies.jar..."
-Set-Location ..\..\
-& ./mvnw clean package
-Set-Location $currentDir
+# 8) Now run Maven package to build fat‑JAR (won’t touch $JreDst)
+& ./mvnw package
+Pop-Location
 
-# Step 5: Delete everything in the target directory except the jar-with-dependencies.jar
-Write-Host "Cleaning up target directory, keeping only jar-with-dependencies.jar..."
-Get-ChildItem -Path "..\..\target" -Exclude "practicumopdracht-$appVersion-jar-with-dependencies.jar" | Remove-Item -Recurse -Force
+# 9) Build input‑dir with fat‑JAR only
+$InputDir = Join-Path $ProjectRoot 'input-dir'
+if (Test-Path $InputDir) { Remove-Item $InputDir -Recurse -Force }
+New-Item -ItemType Directory -Path $InputDir | Out-Null
+Copy-Item (Join-Path $TargetDir "practicumopdracht-$appVersion-jar-with-dependencies.jar") `
+          -Destination $InputDir
+Write-Host "Prepared input-dir with fat‑JAR."
 
-# Step 6: Create a clean directory for the jar file (instead of using target directly)
-Write-Host "Creating clean input directory..."
-$inputDir = "..\..\input-dir"
-if (Test-Path $inputDir) {
-    Remove-Item -Recurse -Force $inputDir
-}
-New-Item -ItemType Directory -Path $inputDir | Out-Null
-
-# Step 7: Copy only the necessary jar to the input directory
-Copy-Item "..\..\target\practicumopdracht-$appVersion-jar-with-dependencies.jar" -Destination $inputDir
-
-# Step 8: Create an application image using jpackage
-Write-Host "Creating app image using jpackage..."
-Set-Location ..\..\
+# 10) Run jpackage
+Push-Location $ProjectRoot
 jpackage `
---type app-image `
---input input-dir `
---name "HvA OOP2 practicumopdracht" `
---main-class nl.hva.oop.practicumopdracht.Main `
---main-jar practicumopdracht-$appVersion-jar-with-dependencies.jar `
---icon src\main\resources\nl\hva\oop\practicumopdracht\images\icon.ico `
---vendor "Remzi Cavdar" `
---copyright "MIT license - Remzi Cavdar - ict@remzi.info" `
---description "HvA OOP2 practicumopdracht JavaFX app" `
---app-version $appVersion `
---runtime-image JRE `
---dest installers\windows\package `
---java-options "--enable-native-access=javafx.graphics" `
---java-options "--add-opens=java.base/java.lang=ALL-UNNAMED"
-Set-Location $currentDir
+  --type app-image `
+  --input "$InputDir" `
+  --name "HvA OOP2 practicumopdracht" `
+  --main-class nl.hva.oop.practicumopdracht.Main `
+  --main-jar "practicumopdracht-$appVersion-jar-with-dependencies.jar" `
+  --icon "src/main/resources/nl/hva/oop/practicumopdracht/images/icon.ico" `
+  --vendor "Remzi Cavdar" `
+  --copyright "MIT license - Remzi Cavdar - ict@remzi.info" `
+  --description "HvA OOP2 practicumopdracht JavaFX app" `
+  --app-version $appVersion `
+  --runtime-image "$JreDst" `
+  --dest $PackageDir `
+  --java-options "--sun-misc-unsafe-memory-access=allow" `
+  --java-options "--enable-native-access=javafx.graphics"
+Pop-Location
+Write-Host "App-image generated → $PackageDir"
 
-# Step 9: Clean up temporary input directory
-Remove-Item -Recurse -Force $inputDir
-Write-Host "App image created and saved in the 'package' directory."
+# 11) Remove temporary input‑dir
+Remove-Item $InputDir -Recurse -Force
 
-# Step 10: Remove the target and JRE directories
-Write-Host "Removing target and JRE directories..."
-
-if (Test-Path "..\..\target")
-{
-    Remove-Item -Recurse -Force "..\..\target"
-    Write-Host "target directory removed."
+# 12) Delete target and JRE
+foreach ($p in @($TargetDir,$JreDst)) {
+  if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Host ("Removed {0}" -f (Split-Path $p -Leaf)) }
 }
-else
-{
-    Write-Host "target directory not found."
-}
+Write-Host "Build cleanup complete.`n"
 
-if (Test-Path "..\..\JRE")
-{
-    Remove-Item -Recurse -Force "..\..\JRE"
-    Write-Host "JRE directory removed."
-}
-else
-{
-    Write-Host "JRE directory not found."
-}
-
-Write-Host "Cleanup complete."
-
-# -------------------------------
-# Generate the Inno Setup Script
-# -------------------------------
+# 13) Generate Inno Setup script beside this script
 $innoSetupScript = @"
 ; windows-installer.iss
 ; Inno Setup Script for HvA OOP2 practicumopdracht
@@ -504,6 +462,8 @@ begin
 end;
 "@
 
-# Finally, write the Inno Setup script to a file
-$innoSetupScript | Out-File -FilePath ".\windows-installer.iss" -Encoding utf8
-Write-Host "Generated updated Inno Setup script with version $appVersion"
+$innoSetupScript | Out-File -FilePath $issPath -Encoding utf8
+Write-Host "Generated Inno Setup script: $issPath (version $appVersion)"
+
+# 14) Return to caller dir
+Set-Location $CallerDir
