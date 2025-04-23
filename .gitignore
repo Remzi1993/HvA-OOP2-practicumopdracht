@@ -346,12 +346,8 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/git,java,linux,macos,maven,gradle,windows,intellij+all,netbeans,eclipse,visualstudiocode
 
 # App specefic files
-App.lock
-# Examples of app data. Comment this out when in production
-# App_data
 JRE/
-
 # Windows installation files
-installers/windows/package/
 installers/windows/out/
+installers/windows/package/
 installers/windows/windows-installer.iss

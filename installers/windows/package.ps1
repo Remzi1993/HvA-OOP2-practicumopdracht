@@ -2,69 +2,77 @@
 # and generating an Inno Setup installer with the dynamic version from pom.xml.
 
 # 1) Resolve folders
-$ScriptRoot  = $PSScriptRoot
+$ScriptRoot = $PSScriptRoot
 $ProjectRoot = Resolve-Path (Join-Path $ScriptRoot '..\..')
-$CallerDir   = Get-Location
+$CallerDir = Get-Location
 
 # 2) Clean up previous build
-Write-Host "Cleaning up previous build ..."
 $issPath = Join-Path $ScriptRoot 'windows-installer.iss'
-if (Test-Path $issPath) { Remove-Item $issPath -Force; Write-Host "  • Removed windows-installer.iss" }
-foreach ($d in 'out','package') {
-  $p = Join-Path $ScriptRoot $d
-  if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Host "  • Removed $d directory" }
+if (Test-Path $issPath) {
+    Remove-Item $issPath -Force
+}
+
+foreach ($d in 'out', 'package') {
+    $p = Join-Path $ScriptRoot $d
+    if (Test-Path $p) {
+        Remove-Item $p -Recurse -Force
+    }
 }
 
 # 3) Read version from pom.xml
-[xml]$pomXml  = Get-Content (Join-Path $ProjectRoot 'pom.xml')
-$appVersion   = $pomXml.project.version
+[xml]$pomXml = Get-Content (Join-Path $ProjectRoot 'pom.xml')
+$appVersion = $pomXml.project.version
 Write-Host "Building application version: $appVersion"
 
 # 4) Prepare out/ and package/
-$OutDir     = Join-Path $ScriptRoot 'out'
+$OutDir = Join-Path $ScriptRoot 'out'
 $PackageDir = Join-Path $ScriptRoot 'package'
 New-Item -ItemType Directory -Force -Path $OutDir,$PackageDir | Out-Null
-Write-Host "Created out/ and package/ directories."
 
-# 5) Run Maven clean -Pall  (wipes target etc.)
-Push-Location $ProjectRoot
-& ./mvnw clean -Pall
-
-# 6) Run jlink (creates target\JRE)
+# 5) Run jlink (creates target\JRE)
 & ./mvnw clean javafx:jlink
 
-# 7) Move runtime image out of target *before* any further clean
+# 6) Move runtime image out of target *before* any further clean
 $TargetDir = Join-Path $ProjectRoot 'target'
-$JreSrc    = Join-Path $TargetDir  'JRE'
-$JreDst    = Join-Path $ProjectRoot 'JRE'
+$JreSrc = Join-Path $TargetDir  'JRE'
+$JreDst = Join-Path $ProjectRoot 'JRE'
 if (Test-Path $JreSrc) {
-  if (Test-Path $JreDst) { Remove-Item $JreDst -Recurse -Force }
-  Move-Item $JreSrc $JreDst
-  Write-Host "Moved runtime image → $JreDst"
+    if (Test-Path $JreDst) {
+        Remove-Item $JreDst -Recurse -Force
+    }
+    Move-Item $JreSrc $JreDst
+    Write-Host "Moved runtime image → $JreDst"
 } else {
-  Write-Host "WARNING: runtime image not found in target\JRE"
+    Write-Host "WARNING: runtime image not found in target\JRE"
 }
 
-# 8) Now run Maven package to build fat‑JAR (won’t touch $JreDst)
+# 7) Now run Maven package to build fat‑JAR
 & ./mvnw package
 Pop-Location
 
-# 9) Build input‑dir with fat‑JAR only
+$TargetDir = Join-Path $ProjectRoot 'target'
+Rename-Item (Join-Path $TargetDir "practicumopdracht-$appVersion.jar") `
+(Join-Path $TargetDir "practicumopdracht.jar") -Force
+Rename-Item (Join-Path $TargetDir "practicumopdracht-$appVersion-jar-with-dependencies.jar") `
+(Join-Path $TargetDir "practicumopdracht-jar-with-dependencies.jar") -Force
+
+# 8) Build input‑dir with fat‑JAR only
 $InputDir = Join-Path $ProjectRoot 'input-dir'
-if (Test-Path $InputDir) { Remove-Item $InputDir -Recurse -Force }
+if (Test-Path $InputDir) {
+    Remove-Item $InputDir -Recurse -Force
+}
 New-Item -ItemType Directory -Path $InputDir | Out-Null
-Copy-Item (Join-Path $TargetDir "practicumopdracht-$appVersion-jar-with-dependencies.jar") `
-          -Destination $InputDir
+Copy-Item (Join-Path $TargetDir "practicumopdracht-jar-with-dependencies.jar") -Destination $InputDir
 Write-Host "Prepared input-dir with fat‑JAR."
 
-# 10) Run jpackage
+# 9) Run jpackage
 Push-Location $ProjectRoot
 jpackage `
   --type app-image `
   --input "$InputDir" `
   --name "HvA OOP2 practicumopdracht" `
   --main-class nl.hva.oop.practicumopdracht.Main `
-  --main-jar "practicumopdracht-$appVersion-jar-with-dependencies.jar" `
+  --main-jar "practicumopdracht-jar-with-dependencies.jar" `
   --icon "src/main/resources/nl/hva/oop/practicumopdracht/images/icon.ico" `
   --vendor "Remzi Cavdar" `
   --copyright "MIT license - Remzi Cavdar - ict@remzi.info" `
@@ -77,16 +85,18 @@ jpackage `
 Pop-Location
 Write-Host "App-image generated → $PackageDir"
 
-# 11) Remove temporary input‑dir
+# 10) Remove temporary input‑dir
 Remove-Item $InputDir -Recurse -Force
 
-# 12) Delete target and JRE
-foreach ($p in @($TargetDir,$JreDst)) {
-  if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Host ("Removed {0}" -f (Split-Path $p -Leaf)) }
+# 11) Delete target and JRE
+foreach ($p in @($TargetDir, $JreDst)) {
+    if (Test-Path $p) {
+        Remove-Item $p -Recurse -Force; Write-Host ("Removed {0}" -f (Split-Path $p -Leaf))
+    }
 }
 Write-Host "Build cleanup complete.`n"
 
-# 13) Generate Inno Setup script beside this script
+# 12) Generate Inno Setup script beside this script
 $innoSetupScript = @"
 ; windows-installer.iss
 ; Inno Setup Script for HvA OOP2 practicumopdracht
@@ -465,5 +475,5 @@ end;
 $innoSetupScript | Out-File -FilePath $issPath -Encoding utf8
 Write-Host "Generated Inno Setup script: $issPath (version $appVersion)"
 
-# 14) Return to caller dir
+# 13) Return to caller dir
 Set-Location $CallerDir
