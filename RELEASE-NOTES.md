@@ -45,3 +45,5 @@
 - Add versioning and copyright information to the Inno Setup script.
 ## 2.0.12
 - Improved Windows build script
+## 2.0.13
+- Small improvements
