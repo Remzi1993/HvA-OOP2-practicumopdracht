@@ -1,5 +1,6 @@
 package nl.hva.oop.practicumopdracht.views;
 
+import info.remzi.javafx.hyperlink.BrowserHyperlink;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -9,7 +10,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import nl.hva.oop.practicumopdracht.MainApplication;
-import nl.hva.oop.practicumopdracht.utils.Hyperlink;
 import java.io.InputStream;
 import static nl.hva.oop.practicumopdracht.Main.APP_VERSION;
 
@@ -72,11 +72,11 @@ public class AboutView {
         gridpane.add(label5, 0, 2);
         gridpane.add(label6, 1, 2);
         Label label7 = new Label("E-mail:");
-        Hyperlink link = new Hyperlink("remzi.cavdar@hva.nl", "mailto:remzi.cavdar@hva.nl");
+        BrowserHyperlink link = new BrowserHyperlink("remzi.cavdar@hva.nl", "mailto:remzi.cavdar@hva.nl");
         gridpane.add(label7, 0, 3);
         gridpane.add(link, 1, 3);
         Label label8 = new Label("Repository:");
-        Hyperlink link2 = new Hyperlink("github.com/Remzi1993/HvA-OOP2-practicumopdracht",
+        BrowserHyperlink link2 = new BrowserHyperlink("github.com/Remzi1993/HvA-OOP2-practicumopdracht",
                 "https://github.com/Remzi1993/HvA-OOP2-practicumopdracht");
         gridpane.add(label8, 0, 4);
         gridpane.add(link2, 1, 4);

@@ -77,6 +77,11 @@
             <version>26.0.2</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>info.remzi</groupId>
+            <artifactId>javafx-hyperlink</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

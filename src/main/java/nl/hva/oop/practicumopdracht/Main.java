@@ -24,7 +24,7 @@ public class Main {
     private static final int DEFAULT_PORT_MIN = 1024;
     private static final int DEFAULT_PORT_MAX = 65535;
 
-    // Load app version from properties file
+    // Load app version from the properties file
     private static String loadAppVersion() {
         try (InputStream input = Main.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
