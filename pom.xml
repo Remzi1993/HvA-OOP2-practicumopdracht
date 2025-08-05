@@ -18,7 +18,7 @@
         <junit.version>5.12.2</junit.version>
         <java.version>24</java.version>
         <javafx.version>24.0.2</javafx.version>
-        <maven-clean-plugin.version>3.4.1</maven-clean-plugin.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     </properties>
 
