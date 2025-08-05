@@ -1,0 +1,42 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Amsterdam"
+
+    # Limit noise
+    open-pull-requests-limit: 10
+
+    # Conventional‑commit style PR titles/commits
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"   # adds (deps) or (deps-dev)
+
+    # Optional labels for the PRs (override defaults)
+    labels:
+      - "dependencies"
+
+    # Group related updates into fewer PRs
+    groups:
+      maven-plugins:
+        dependency-type: "development"
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.sonatype.central:central-publishing-maven-plugin"
+      javafx:
+        patterns:
+          - "org.openjfx:*"
+
+    # Keep JavaFX on the 24.x STABLE line for now.
+    # Why: New JavaFX majors (25.x, 26.x, …) start as -ea pre-releases; we don’t want PRs for pre-releases
+    # or for the next major until we explicitly decide to move.
+    # The range "[25,)" means "25.0.0 and above" — i.e., ignore any update >= 25 (including 25-ea+N and future majors).
+    # When ready to adopt 25.x stable, change this to "[26,)" (to stay on 25.x), or remove the rule entirely.
+    ignore:
+      - dependency-name: "org.openjfx:*"
+        versions:
+          - "[25,)"
