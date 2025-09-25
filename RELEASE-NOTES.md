@@ -47,3 +47,5 @@
 - Improved Windows build script
 ## 2.0.13
 - Small improvements
+## 2.0.14
+- Java 25 and JavaFX 25 upgrade
