@@ -39,4 +39,4 @@ updates:
     ignore:
       - dependency-name: "org.openjfx:*"
         versions:
-          - "[25,)"
+          - "[26,)"
