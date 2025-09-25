@@ -1,23 +1,30 @@
 # PowerShell script for automating the HvA JavaFX project Windows packaging process.
 # and generating an Inno Setup installer with the dynamic version from pom.xml.
 
-# 1) Resolve folders
+# 1) Variables and paths
 $ScriptRoot = $PSScriptRoot
 $ProjectRoot = Resolve-Path (Join-Path $ScriptRoot '..\..')
 $CallerDir = Get-Location
+$issPath = Join-Path $ScriptRoot 'windows-installer.iss'
 
 # 2) Clean up previous build
-$issPath = Join-Path $ScriptRoot 'windows-installer.iss'
-if (Test-Path $issPath) {
-    Remove-Item $issPath -Force
-}
+$pathsToRemove = @(
+    (Join-Path $ScriptRoot 'out'),
+    (Join-Path $ScriptRoot 'package'),
+    $issPath
+)
 
-foreach ($d in 'out', 'package') {
-    $p = Join-Path $ScriptRoot $d
-    if (Test-Path $p) {
-        Remove-Item $p -Recurse -Force
+foreach ($p in $pathsToRemove) {
+    if (Test-Path -LiteralPath $p) {
+        try {
+            Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction Stop
+            Write-Host ("Removed {0}" -f (Split-Path -Path $p -Leaf))
+        } catch {
+            Write-Warning ("Failed to remove {0}: {1}" -f $p, $_.Exception.Message)
+        }
     }
 }
+Write-Host "`n🧹 Cleanup complete — removed previous build artifacts (out, package, windows-installer.iss).`n" -ForegroundColor Green
 
 # 3) Read version from pom.xml
 [xml]$pomXml = Get-Content (Join-Path $ProjectRoot 'pom.xml')
@@ -30,7 +37,8 @@ $PackageDir = Join-Path $ScriptRoot 'package'
 New-Item -ItemType Directory -Force -Path $OutDir,$PackageDir | Out-Null
 
 # 5) Run jlink (creates target\JRE)
-& ./mvnw clean javafx:jlink
+& (Join-Path $ProjectRoot 'mvnw.cmd') -f (Join-Path $ProjectRoot 'pom.xml') clean javafx:jlink
+if ($LASTEXITCODE) { throw "Maven jlink failed (exit code $LASTEXITCODE)" }
 
 # 6) Move runtime image out of target *before* any further clean
 $TargetDir = Join-Path $ProjectRoot 'target'
@@ -47,8 +55,8 @@ if (Test-Path $JreSrc) {
 }
 
 # 7) Now run Maven package to build fat‑JAR
-& ./mvnw package
-Pop-Location
+& (Join-Path $ProjectRoot 'mvnw.cmd') -f (Join-Path $ProjectRoot 'pom.xml') package
+if ($LASTEXITCODE) { throw "Maven package failed (exit code $LASTEXITCODE)" }
 
 $TargetDir = Join-Path $ProjectRoot 'target'
 Rename-Item (Join-Path $TargetDir "practicumopdracht-$appVersion.jar") `
