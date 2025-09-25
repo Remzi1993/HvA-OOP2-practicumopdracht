@@ -1,3 +1,5 @@
+[![CodeQL](https://github.com/Remzi1993/HvA-OOP2-practicumopdracht/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Remzi1993/HvA-OOP2-practicumopdracht/actions/workflows/github-code-scanning/codeql)
+
 # HvA Java Practical Assignment for OOP2
 
 This project is a JavaFX application that implements a master-detail functionality.
