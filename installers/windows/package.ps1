@@ -6,30 +6,44 @@ $ScriptRoot = $PSScriptRoot
 $ProjectRoot = Resolve-Path (Join-Path $ScriptRoot '..\..')
 $CallerDir = Get-Location
 $issPath = Join-Path $ScriptRoot 'windows-installer.iss'
+$NBSP = [char]0x00A0
 
-# 2) Clean up previous build
+# --- Pretty output helpers ---
+function Info([string]$msg) { Write-Host $msg -ForegroundColor Cyan }
+function Ok([string]$msg)   { Write-Host $msg -ForegroundColor Green }
+function Fail([string]$msg) { Write-Error $msg }
+
+# 2) Clean up previous build (only if needed)
 $pathsToRemove = @(
     (Join-Path $ScriptRoot 'out'),
     (Join-Path $ScriptRoot 'package'),
     $issPath
 )
 
+# Check what exists first
+$existing = @()
 foreach ($p in $pathsToRemove) {
-    if (Test-Path -LiteralPath $p) {
+    if (Test-Path -LiteralPath $p) { $existing += $p }
+}
+
+if ($existing.Count -gt 0) {
+    Info "🧽$NBSP Cleaning previous build artifacts..."
+    foreach ($p in $existing) {
         try {
             Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction Stop
-            Write-Host ("Removed {0}" -f (Split-Path -Path $p -Leaf))
+            Ok ("✅$NBSP Removed {0}" -f (Split-Path -Path $p -Leaf))
         } catch {
-            Write-Warning ("Failed to remove {0}: {1}" -f $p, $_.Exception.Message)
+            Fail ("❌$NBSP Failed to remove {0}: {1}" -f $p, $_.Exception.Message)
+            throw
         }
     }
+    Ok "🧹$NBSP Cleanup complete."
 }
-Write-Host "`n🧹 Cleanup complete — removed previous build artifacts (out, package, windows-installer.iss).`n" -ForegroundColor Green
 
 # 3) Read version from pom.xml
 [xml]$pomXml = Get-Content (Join-Path $ProjectRoot 'pom.xml')
 $appVersion = $pomXml.project.version
-Write-Host "Building application version: $appVersion"
+Info "Building application version: $appVersion"
 
 # 4) Prepare out/ and package/
 $OutDir = Join-Path $ScriptRoot 'out'
@@ -37,8 +51,9 @@ $PackageDir = Join-Path $ScriptRoot 'package'
 New-Item -ItemType Directory -Force -Path $OutDir,$PackageDir | Out-Null
 
 # 5) Run jlink (creates target\JRE)
+Info "🔧$NBSP Running Maven jlink..."
 & (Join-Path $ProjectRoot 'mvnw.cmd') -f (Join-Path $ProjectRoot 'pom.xml') clean javafx:jlink
-if ($LASTEXITCODE) { throw "Maven jlink failed (exit code $LASTEXITCODE)" }
+if ($LASTEXITCODE) { Fail "❌$NBSP Maven jlink failed (exit code $LASTEXITCODE)"; throw }
 
 # 6) Move runtime image out of target *before* any further clean
 $TargetDir = Join-Path $ProjectRoot 'target'
@@ -49,14 +64,15 @@ if (Test-Path $JreSrc) {
         Remove-Item $JreDst -Recurse -Force
     }
     Move-Item $JreSrc $JreDst
-    Write-Host "Moved runtime image → $JreDst"
+    Ok "✅$NBSP Runtime image created and moved to → $JreDst"
 } else {
-    Write-Host "WARNING: runtime image not found in target\JRE"
+    Fail "❌$NBSP Couldn't move runtime image because it was not found in target\JRE"
 }
 
 # 7) Now run Maven package to build fat‑JAR
+Info "📦$NBSP Running Maven package...`n"
 & (Join-Path $ProjectRoot 'mvnw.cmd') -f (Join-Path $ProjectRoot 'pom.xml') package
-if ($LASTEXITCODE) { throw "Maven package failed (exit code $LASTEXITCODE)" }
+if ($LASTEXITCODE) { Fail "❌$NBSP Maven package failed (exit code $LASTEXITCODE)"; throw }
 
 $TargetDir = Join-Path $ProjectRoot 'target'
 Rename-Item (Join-Path $TargetDir "practicumopdracht-$appVersion.jar") `
@@ -65,15 +81,17 @@ Rename-Item (Join-Path $TargetDir "practicumopdracht-$appVersion-jar-with-depend
 (Join-Path $TargetDir "practicumopdracht-jar-with-dependencies.jar") -Force
 
 # 8) Build input‑dir with fat‑JAR only
+Info "`n📁$NBSP Preparing input-dir with fat-JAR..."
 $InputDir = Join-Path $ProjectRoot 'input-dir'
 if (Test-Path $InputDir) {
     Remove-Item $InputDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $InputDir | Out-Null
 Copy-Item (Join-Path $TargetDir "practicumopdracht-jar-with-dependencies.jar") -Destination $InputDir
-Write-Host "Prepared input-dir with fat‑JAR."
+Ok "✅$NBSP Prepared input-dir with fat-JAR."
 
 # 9) Run jpackage
+Info "📦$NBSP Running jpackage..."
 Push-Location $ProjectRoot
 jpackage `
   --type app-image `
@@ -91,7 +109,7 @@ jpackage `
   --java-options "--sun-misc-unsafe-memory-access=allow" `
   --java-options "--enable-native-access=javafx.graphics"
 Pop-Location
-Write-Host "App-image generated → $PackageDir"
+Ok ("🎁$NBSP App-image generated → {0}" -f $PackageDir)
 
 # 10) Remove temporary input‑dir
 Remove-Item $InputDir -Recurse -Force
@@ -102,7 +120,7 @@ foreach ($p in @($TargetDir, $JreDst)) {
         Remove-Item $p -Recurse -Force; Write-Host ("Removed {0}" -f (Split-Path $p -Leaf))
     }
 }
-Write-Host "Build cleanup complete.`n"
+Ok "🧼$NBSP Build cleanup complete."
 
 # 12) Generate Inno Setup script beside this script
 $innoSetupScript = @"
@@ -481,7 +499,7 @@ end;
 "@
 
 $innoSetupScript | Out-File -FilePath $issPath -Encoding utf8
-Write-Host "Generated Inno Setup script: $issPath (version $appVersion)"
+Ok "✅$NBSP Generated Inno Setup script: $issPath (version $appVersion)"
 
 # 13) Return to caller dir
 Set-Location $CallerDir
