@@ -15,7 +15,7 @@
         <app.version>2.0.14</app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <junit.version>6.0.0</junit.version>
+        <junit.version>6.0.1</junit.version>
         <java.version>25</java.version>
         <javafx.version>25.0.1</javafx.version>
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
