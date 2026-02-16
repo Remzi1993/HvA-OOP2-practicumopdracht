@@ -81,5 +81,3 @@ Note: In the `data` folder, you'll find dummy data for the app (for each data ty
 - Java Development Kit (JDK) with JavaFX support
 - Maven
 - Inno Setup (for creating Windows installers)
-
-Test new signing
